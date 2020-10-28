@@ -24,9 +24,9 @@ type BoardProps = {
 const Board = ({ cells }: BoardProps) => {
   // Calculating properties to calculate size of board as a grid and to map coordinates
   const minXCoordinate = cells.reduce((acc, current) => acc = Math.min(acc, current.x), +Infinity)
-  const minYZCoordinate = cells.reduce((acc, current) => acc = Math.min(acc, current.y - current.z), +Infinity)
+  const minYZCoordinate = cells.reduce((acc, current) => acc = Math.min(acc, -(current.y - current.z)), +Infinity)
   const maxXCoordinate = cells.reduce((acc, current) => acc = Math.max(acc, current.x), -Infinity)
-  const maxYZCoordinate = cells.reduce((acc, current) => acc = Math.max(acc, current.x), -Infinity)
+  const maxYZCoordinate = cells.reduce((acc, current) => acc = Math.max(acc, -(current.y - current.z)), -Infinity)
   const totalCols = maxXCoordinate - minXCoordinate + 1
   const totalRows = maxYZCoordinate - minYZCoordinate + 1
 
@@ -36,6 +36,11 @@ const Board = ({ cells }: BoardProps) => {
       col: cell.x - minXCoordinate
     }
   }
+  
+  // TODO Handy function that needs to be used but moved to more appropriate place
+  const cellHasValidCubeCoordinate = (cell: Cell): Boolean => {
+    return cell.x + cell.y + cell.z == 0
+  }
 
   return (
     <div className="board" style={{
@@ -44,15 +49,18 @@ const Board = ({ cells }: BoardProps) => {
       {cells.map((cell) => {
         const {row, col} = convertCellToGridLocation(cell, minXCoordinate, minYZCoordinate)
         const gridColumnStart = 1 + (col * 2)
-        const gridRowStart = row  
+        const gridRowStart = row + 1
         
         return (
           <div className="cell" style={{
             gridColumnStart,
             gridRowStart
           }}>
-              <div className="cell_content">
-
+              <div className="cell_content" style={{
+                display: "flex",
+                justifyContent: "center"
+              }}>
+                <div>{cell.x} {cell.y} {cell.z}</div>
               </div>
           </div>
         )
