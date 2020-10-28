@@ -1,0 +1,27 @@
+.board {
+  display: grid;
+  list-style-type: none;
+  margin: 0;
+  /* TODO: Move to javascript to make configurable */
+  grid-gap: 1rem;
+}
+
+.cell {
+  position: relative;
+  grid-column-end: span 3;
+  grid-row-end: span 2;
+  height: 0;
+  /* sqrt(3)/2 * 2 * length_side_hex for height regular hexagon (plus some extra because boetiful)*/
+  padding-bottom: 88.6025%;
+
+  background-color: blue;
+}
+
+.cell_content {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  clip-path: polygon(75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%, 25% 0);
+}

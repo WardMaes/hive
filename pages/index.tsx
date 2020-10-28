@@ -1,13 +1,12 @@
 import Head from 'next/head'
 
-import Board, { BoardType } from '../components/Board'
+import Board, { Cell } from '../components/Board'
 
 
 
 export default function Home() {
 
-  const mockBoard: BoardType = {
-    cells: [
+  const mockCells: Cell[] =[
       { x: 0, y: 0, z: 0 }, // center
       { x: -1, y: 1, z: 0 },  // top left
       { x: -1, y: 1, z: 0 },  // top center
@@ -15,8 +14,7 @@ export default function Home() {
       { x: -1, y: 0, z: 1 }, // bottom left
       { x: 0, y: -1, z: 1 }, // bottom center
       { x: 1, y: -1, z: 0 }, // bottom right
-    ],
-  }
+    ];
 
   return (
     <>
@@ -26,7 +24,7 @@ export default function Home() {
       </Head>
 
       <main className="border">
-        <Board board={mockBoard} />
+        <Board cells={mockCells} />
       </main>
     </>
   )

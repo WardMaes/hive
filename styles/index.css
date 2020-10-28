@@ -6,6 +6,7 @@
 
 @import "./container.css";
 @import "./buttons.css";
+@import "./board.css";
 
 html,
 body {
