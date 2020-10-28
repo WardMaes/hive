@@ -1,10 +1,12 @@
 .board {
+  /* Extract to javascript later */
+  --grid-gap: 0.3rem;
   width: 100%;
   display: grid;
   list-style-type: none;
   margin: 0;
-  /* TODO: Move to javascript to make configurable */
-  grid-gap: 0.8rem;
+  /* TODO: Move to javascript to make configurable (could do actual calculation but looks complex, so guesstimate ratio) */
+  gap: var(--grid-gap) calc(var(--grid-gap) * 2);
 }
 
 .cell {

@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react"
 import { DEFAULT_MIN_VERSION } from "tls"
 
+import { Cell } from "./../lib/hex"
+
 type BoardCoordinate = {
   row: number,
   col: number
 }
 
-export type Cell = {
-  x: number
-  y: number
-  z: number
-}
+// export type Cell = {
+//   x: number
+//   y: number
+//   z: number
+// }
 
 // export type BoardType = {
 //   cells: Cell[]
@@ -26,20 +28,15 @@ const Board = ({ cells }: BoardProps) => {
   const minXCoordinate = cells.reduce((acc, current) => acc = Math.min(acc, current.x), +Infinity)
   const minYZCoordinate = cells.reduce((acc, current) => acc = Math.min(acc, -(current.y - current.z)), +Infinity)
   const maxXCoordinate = cells.reduce((acc, current) => acc = Math.max(acc, current.x), -Infinity)
-  const maxYZCoordinate = cells.reduce((acc, current) => acc = Math.max(acc, -(current.y - current.z)), -Infinity)
+  // const maxYZCoordinate = cells.reduce((acc, current) => acc = Math.max(acc, -(current.y - current.z)), -Infinity)
   const totalCols = maxXCoordinate - minXCoordinate + 1
-  const totalRows = maxYZCoordinate - minYZCoordinate + 1
+  // const totalRows = maxYZCoordinate - minYZCoordinate + 1
 
   const convertCellToGridLocation = (cell: Cell, minXCoordinate: number, minYZCoordinate: number): BoardCoordinate => {
     return {
       row: -(cell.y - cell.z) - minYZCoordinate,
       col: cell.x - minXCoordinate
     }
-  }
-  
-  // TODO Handy function that needs to be used but moved to more appropriate place
-  const cellHasValidCubeCoordinate = (cell: Cell): Boolean => {
-    return cell.x + cell.y + cell.z == 0
   }
 
   return (
