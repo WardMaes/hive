@@ -44,7 +44,7 @@ const Board = ({ cells }: BoardProps) => {
       {cells.map((cell) => {
         const {row, col} = convertCellToGridLocation(cell, minXCoordinate, minYZCoordinate)
         const gridColumnStart = 1 + (col * 2)
-        const gridRowStart = (row - 1) * 2 + 1  
+        const gridRowStart = row  
         
         return (
           <div className="cell" style={{
