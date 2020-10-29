@@ -1,4 +1,5 @@
-import { Cell } from './../lib/hex'
+import { Cell as CellType } from './../lib/hex'
+import Cell from './Cell'
 
 type BoardCoordinate = {
   row: number
@@ -6,8 +7,8 @@ type BoardCoordinate = {
 }
 
 type BoardProps = {
-  cells: Cell[]
-  onPlace: (cell: Cell) => void
+  cells: CellType[]
+  onPlace: (cell: CellType) => void
 }
 
 const Board = ({ cells, onPlace }: BoardProps) => {
@@ -29,7 +30,7 @@ const Board = ({ cells, onPlace }: BoardProps) => {
   // const totalRows = maxYZCoordinate - minYZCoordinate + 1
 
   const convertCellToGridLocation = (
-    cell: Cell,
+    cell: CellType,
     minXCoordinate: number,
     minYZCoordinate: number
   ): BoardCoordinate => {
@@ -57,7 +58,7 @@ const Board = ({ cells, onPlace }: BoardProps) => {
 
         return (
           <div
-            className={'cell ' + (cell.occupied ? 'cell-occupied' : '')}
+            className={'cell'}
             style={{
               gridColumnStart,
               gridRowStart,
@@ -65,17 +66,7 @@ const Board = ({ cells, onPlace }: BoardProps) => {
             key={`${cell.x}-${cell.y}-${cell.z}`}
             onClick={() => onPlace(cell)}
           >
-            <div
-              className="cell_content"
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-              }}
-            >
-              <div>
-                {cell.x} {cell.y} {cell.z}
-              </div>
-            </div>
+            <Cell cellRef={cell.ref} />
           </div>
         )
       })}

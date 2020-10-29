@@ -34,7 +34,7 @@ export const createCellMachine = (cell: Cell) =>
       SELECT: {
         target: 'selected',
         actions: assign({
-          occupied: () => true,
+          occupied: (context) => !context.occupied,
         }),
       },
     },

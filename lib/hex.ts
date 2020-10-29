@@ -3,6 +3,7 @@ export type Cell = {
   y: number
   z: number
   occupied?: boolean
+  ref?: any
 }
 
 // TODO: Handy function that needs to be used but moved to more appropriate place

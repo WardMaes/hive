@@ -31,7 +31,7 @@ const initialContext: GameContext = {
     // { x: 1, y: 2, z: -3, occupied: true },
     // { x: 0, y: 3, z: -3, occupied: true },
     { x: 0, y: 0, z: 0, occupied: true }, // center
-    { x: -1, y: 1, z: 0, occupied: true }, // top left
+    { x: -1, y: 1, z: 0, occupied: false }, // top left
     // { x: 0, y: 1, z: -1, occupied: true }, // top center
     // { x: 1, y: 0, z: -1, occupied: true }, // top right
     // { x: -1, y: 0, z: 1, occupied: true }, // bottom left
