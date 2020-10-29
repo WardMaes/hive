@@ -1,5 +1,3 @@
-const Piece = ({}) => {
-
-}
+const Piece = ({}) => {}
 
 export default Piece
