@@ -2,15 +2,16 @@ export type Cell = {
   x: number
   y: number
   z: number
+  occupied?: boolean
 }
 
 // TODO: Handy function that needs to be used but moved to more appropriate place
-const cellHasValidCubeCoordinate = (cell: Cell): Boolean => {
+const hasValidCubeCoordinate = (cell: Cell): Boolean => {
   return cell.x + cell.y + cell.z == 0
 }
 
-const calculateNeighborsCell = (cell: Cell): Cell[] => {
-  // Returns the neighbors in clockwise order
+// Returns the neighbors in clockwise order
+const getNeighbours = (cell: Cell): Cell[] => {
   return [
     // Note that these directions only apply in flat configuration
     { x: cell.x, y: cell.y + 1, z: cell.z - 1 }, // Top
@@ -22,38 +23,29 @@ const calculateNeighborsCell = (cell: Cell): Cell[] => {
   ]
 }
 
-const cellsHaveIdentialCubeCoordinates = (cellA: Cell, cellB: Cell) => {
+const haveSameCubeCoordinates = (cellA: Cell, cellB: Cell): Boolean => {
   return cellA.x == cellB.x && cellA.y == cellB.y && cellA.z == cellB.z
 }
 
-const filterUnoccupiedCells = (
-  cells: Cell[],
-  occupiedCells: Cell[]
-): Cell[] => {
-  // Better rewritten as while or something even more performant (but probably doesnt even matter for performance)
-  return cells.filter((cell) =>
-    occupiedCells.reduce(
-      (acc: Boolean, current: Cell) =>
-        (acc = !acc ? cellsHaveIdentialCubeCoordinates(cell, current) : acc),
-      false
-    )
+const uniqueCells = (cells: Cell[]): Cell[] => {
+  return cells.filter(
+    (cell, i, array) =>
+      array.findIndex((a) => haveSameCubeCoordinates(a, cell)) === i
   )
 }
 
-const filterOccupiedCells = (cells: Cell[], occupiedCells: Cell[]): Cell[] => {
-  return cells.filter((cell) =>
-    occupiedCells.reduce(
-      (acc: Boolean, current: Cell) =>
-        (acc = !acc ? cellsHaveIdentialCubeCoordinates(cell, current) : acc),
-      false
-    )
+const filterOverlap = (cellsA: Cell[], cellsB: Cell[]): Cell[] => {
+  console.log('cellsA', cellsA)
+  console.log('cellsB', cellsB)
+  return cellsA.filter((cellA) =>
+    cellsB.find((cellB) => !haveSameCubeCoordinates(cellA, cellB))
   )
 }
 
 export {
-  cellHasValidCubeCoordinate,
-  calculateNeighborsCell,
-  cellsHaveIdentialCubeCoordinates,
-  filterUnoccupiedCells,
-  filterOccupiedCells,
+  uniqueCells,
+  hasValidCubeCoordinate,
+  getNeighbours,
+  haveSameCubeCoordinates,
+  filterOverlap,
 }

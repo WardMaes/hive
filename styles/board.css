@@ -18,6 +18,11 @@
   /* sqrt(3)/2 * 2 * length_side_hex for height regular hexagon (plus some extra because boetiful)*/
   padding-bottom: 88.6025%;
   clip-path: polygon(75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%, 25% 0);
+  background-color: lightgray;
+  cursor: pointer;
+}
+
+.cell-occupied {
   background-color: #fdadad;
 }
 
