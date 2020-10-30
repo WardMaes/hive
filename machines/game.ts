@@ -41,7 +41,7 @@ const initialContext: GameContext = {
 }
 
 export const gameMachine = Machine<GameContext, GameStateSchema, GameEvent>({
-  key: 'game',
+  id: 'game',
   initial: 'initial',
   context: initialContext,
   states: {
@@ -77,56 +77,86 @@ export const gameMachine = Machine<GameContext, GameStateSchema, GameEvent>({
 })
 
 const turnMachine = Machine({
-  key: 'turn',
-  initial: '',
+  id: 'turn',
+  initial: 'initializing',
   context: {
+    selectedPiece: {},
     cellsPossibleDestinationsCurrentMove: [],
+    // 'piecesAllowedToBeMoved' and 'piecesAllowedToBePlaced' could maybe be merged into 1 property 'piecesAllowedToBePlayed'
+    piecesAllowedToBeMoved: [],
+    piecesAllowedToBePlaced: [],
   },
   states: {
-    select: {
+    initializing: {
+      entry: assign({
+        piecesAllowedToBeMoved: (context) => [], // Logic which pieces are allowed to be moved
+        piecesAllowedToBePlaced: (context) => [], // Logic which pieces are allowed to be placed
+      }),
+      always: 'idle',
+    },
+    idle: {
+      // Waiting for player to select a piece on the board, or an unplayed piece
+      // Also includes logic which pieces are allowed to be selected
+      // - Won't break the hive
+      // - If it is the n-th (don't remember) move and the queen hasn't been placed
+      on: {
+        SELECT: {
+          target: 'selected',
+          cond: 'queen rule + doesnt break hive',
+        },
+      },
+    },
+    selected: {
       // Selecting either an already placed piece to move or a unplayed piece to place
       entry: assign({
-        // Also includes logic which pieces are allowed to be selected
-        // - Won't break the hive
-        // - If it is the n-th (don't remember) move and the queen hasn't been placed
-        piecesAllowedToBePlaced: (context) => {
-          null
-        },
-        piecesAllowedToBeMoved: (context) => {
-          null
+        selectedPiece: (context, event) => {}, // Set the clicked piece as selected
+        cellsPossibleDestinationsCurrentMove: (context) => {
+          // Calculate which cells the player can click to place the selectedPiece
         },
       }),
       on: {
         // Dont know if it is possible to add identifier selected piece to the event but that would be the goal
         // That or listener that links to function that sets the context
-        PLACE: 'place',
-        MOVE: 'move',
+        PLACE: { target: 'placing', cond: 'player clicked a valid cell' },
+        MOVE: { target: 'moving', cond: 'player clicked a valid cell' },
+        // Player selects a different piece
+        SELECT: {
+          actions: assign({ selectedPiece: (context, event) => {} }),
+          cond: 'queen rule + doesnt breake hive',
+        },
       },
     },
-    place: {
+    // 'placing' and 'moving' states might possibly be merged into 1 state called 'playing'
+    placing: {
+      // Animation to be played in frontend while in this state
       entry: assign({
-        cellsPossibleDestinationsCurrentMove: (context) => {},
+        cellsPossibleDestinationsCurrentMove: (context) => null, // Reset possible destinations (not sure if needed)
       }),
-    },
-    move: {
-      // Calculate possible valid destinations of piece
-      entry: assign({
-        cellsPossibleDestinationsCurrentMove: (context) => {},
-      }),
-      on: {
-        //
-        DESTINATION_CHOSEN: '',
+      after: {
+        // After a 1s animation, go to finished state
+        1000: 'finished',
       },
     },
-    turnFinished: {
+    moving: {
+      // Animation to be played in frontend while in this state
+      entry: assign({
+        cellsPossibleDestinationsCurrentMove: (context) => null, // Reset possible destinations (not sure if needed)
+      }),
+      after: {
+        // After a 1s animation, go to finished state
+        1000: 'finished',
+      },
+    },
+    finished: {
       // Transitive state to finish turn and to return to game machine
+      type: 'final', // This will notify parent machine the current turn is over
     },
   },
 })
 
 const differentGameMachine = Machine({
-  key: 'game',
-  initial: 'gameStart',
+  id: 'game',
+  initial: 'initializing',
   context: {
     cellsPlacedPieces: [],
     currentPlayer: 1,
@@ -134,28 +164,40 @@ const differentGameMachine = Machine({
     unplacedPiecesPlayer2: [],
   },
   states: {
-    gameStart: {
+    initializing: {
       entry: assign((context) => {
         // Select start player (propose random, animated in UI as coin flip or something)
+        // Set initial pieces for both players
       }),
+      always: 'playing',
     },
-    playerTurn: {
-      // Enter "sub"-machine to handle player turn
+    playing: {
+      invoke: {
+        src: turnMachine,
+        onDone: {
+          // This will be entered when turnMachine enters its final state
+          target: 'checkGameFinished',
+        },
+      },
     },
     checkGameFinished: {
-      on: {
-        // Transient transition with conditionals to check whether game is over
-        '': [
-          {
-            target: 'gameOver',
-            cond: '' /* Conditional logic to check if queen is surrounded */,
-          },
-          { target: 'changeTurn' },
-        ],
-      },
+      // Transient transition with conditionals to check whether game is over
+      always: [
+        {
+          target: 'gameOver',
+          cond: '' /* Conditional logic to check if queen is surrounded */,
+        },
+        { target: 'changeTurn' },
+      ],
     },
     changeTurn: {
       // Transient state that simply changes player turn
+      always: {
+        actions: assign({
+          currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
+        }),
+        target: 'playing',
+      },
     },
     gameOver: {},
   },
