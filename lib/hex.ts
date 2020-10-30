@@ -4,7 +4,6 @@ export type Cell = {
   z: number
 }
 
-// TODO: Handy function that needs to be used but moved to more appropriate place
 const hasValidCubeCoordinate = (cell: Cell): Boolean => {
   return cell.x + cell.y + cell.z == 0
 }
