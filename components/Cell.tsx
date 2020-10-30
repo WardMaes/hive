@@ -18,13 +18,9 @@ const Cell = ({ cell }: CellProps) => {
   return (
     <div
       className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-      }}
       onClick={() => sendToTurn(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
     >
-      <div>{JSON.stringify(isSelected, null, 2)}</div>
+      <div className="cell_clip">{isSelected && 'selected'}</div>
     </div>
   )
 }
