@@ -15,8 +15,8 @@ export default function Home() {
 
       <main>
         <Board
-          cells={state.context.cells}
-          onPlace={(cell) => send('CELL.SELECT', { cell })}
+          cells={state.context.cellsPlacedPieces}
+          // onPlace={(cell) => send('SELECT', { cell })}
         />
       </main>
     </>

@@ -1,24 +1,20 @@
 import React from 'react'
-import { useActor } from '@xstate/react'
 
 const Cell = ({ cellRef }) => {
-  const [state, send] = useActor(cellRef)
-
+  // const [state, send] = useActor(cellRef)
+  console.log('cellRef', cellRef)
   return (
     <div
       className={
-        'cell_content' + (state.context.occupied ? ' cell-occupied' : '')
+        'cell_content'
+        // 'cell_content' + (state.context.occupied ? ' cell-occupied' : '')
       }
       style={{
         display: 'flex',
         justifyContent: 'center',
       }}
     >
-      <div>
-        {state.context.x}
-        {state.context.y}
-        {state.context.z}
-      </div>
+      <div>{JSON.stringify(cellRef, null, 2)}</div>
     </div>
   )
 }

@@ -66,7 +66,7 @@ const Board = ({ cells, onPlace }: BoardProps) => {
             key={`${cell.x}-${cell.y}-${cell.z}`}
             onClick={() => onPlace(cell)}
           >
-            <Cell cellRef={cell.ref} />
+            <Cell cellRef={cell} />
           </div>
         )
       })}
