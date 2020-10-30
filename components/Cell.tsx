@@ -1,20 +1,30 @@
-import React from 'react'
+import React, { useContext } from 'react'
 
-const Cell = ({ cellRef }) => {
-  // const [state, send] = useActor(cellRef)
-  console.log('cellRef', cellRef)
+import { turnContext } from '../context/machines'
+
+import { haveSameCubeCoordinates, Cell as CellType } from '../lib/hex'
+
+type CellProps = {
+  cell: CellType
+}
+
+const Cell = ({ cell }: CellProps) => {
+  const [turnState, sendToTurn] = useContext(turnContext)
+
+  const selectedPiece = turnState.context.selectedPiece
+  const isSelected =
+    selectedPiece && haveSameCubeCoordinates(selectedPiece, cell)
+
   return (
     <div
-      className={
-        'cell_content'
-        // 'cell_content' + (state.context.occupied ? ' cell-occupied' : '')
-      }
+      className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
       style={{
         display: 'flex',
         justifyContent: 'center',
       }}
+      onClick={() => sendToTurn(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
     >
-      <div>{JSON.stringify(cellRef, null, 2)}</div>
+      <div>{JSON.stringify(isSelected, null, 2)}</div>
     </div>
   )
 }

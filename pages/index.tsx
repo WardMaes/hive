@@ -1,11 +1,14 @@
 import Head from 'next/head'
-import { useMachine } from '@xstate/react'
 
 import Board from '../components/Board'
-import { gameMachine } from '../machines/game'
+
+import { useContext } from 'react'
+
+import { gameContext } from '../context/machines'
 
 export default function Home() {
-  const [state, send] = useMachine(gameMachine)
+  const [gameState, sendToGame] = useContext(gameContext)
+
   return (
     <>
       <Head>
@@ -14,10 +17,7 @@ export default function Home() {
       </Head>
 
       <main>
-        <Board
-          cells={state.context.cellsPlacedPieces}
-          // onPlace={(cell) => send('SELECT', { cell })}
-        />
+        <Board cells={gameState.context.cellsPlacedPieces} />
       </main>
     </>
   )

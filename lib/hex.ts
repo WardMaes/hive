@@ -2,8 +2,6 @@ export type Cell = {
   x: number
   y: number
   z: number
-  occupied?: boolean
-  ref?: any
 }
 
 // TODO: Handy function that needs to be used but moved to more appropriate place
@@ -36,8 +34,6 @@ const uniqueCells = (cells: Cell[]): Cell[] => {
 }
 
 const filterOverlap = (cellsA: Cell[], cellsB: Cell[]): Cell[] => {
-  console.log('cellsA', cellsA)
-  console.log('cellsB', cellsB)
   return cellsA.filter((cellA) =>
     cellsB.find((cellB) => !haveSameCubeCoordinates(cellA, cellB))
   )

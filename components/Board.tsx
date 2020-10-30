@@ -8,10 +8,9 @@ type BoardCoordinate = {
 
 type BoardProps = {
   cells: CellType[]
-  onPlace: (cell: CellType) => void
 }
 
-const Board = ({ cells, onPlace }: BoardProps) => {
+const Board = ({ cells }: BoardProps) => {
   // Calculating properties to calculate size of board as a grid and to map coordinates
   const minXCoordinate = cells.reduce(
     (acc, current) => (acc = Math.min(acc, current.x)),
@@ -64,9 +63,8 @@ const Board = ({ cells, onPlace }: BoardProps) => {
               gridRowStart,
             }}
             key={`${cell.x}-${cell.y}-${cell.z}`}
-            onClick={() => onPlace(cell)}
           >
-            <Cell cellRef={cell} />
+            <Cell cell={cell} />
           </div>
         )
       })}
