@@ -4,6 +4,10 @@ import { HexCoord } from '../lib/hex'
 import { turnMachine, TurnContext, TurnEvent } from './turn'
 
 const startCells: Cell[] = [
+  { coord: { x: 1, y: 1, z: -2 }, insects: [] },
+  { coord: { x: 2, y: -1, z: -1 }, insects: [] },
+  { coord: { x: 1, y: 2, z: -3 }, insects: [] },
+  { coord: { x: 0, y: 3, z: -3 }, insects: [] },
   { coord: { x: 0, y: 0, z: 0 }, insects: [] }, // center
   { coord: { x: -1, y: 1, z: 0 }, insects: [] }, // top left
   { coord: { x: 0, y: 1, z: -1 }, insects: [] }, // top center
@@ -14,11 +18,11 @@ const startCells: Cell[] = [
 ]
 
 export enum InsectName {
-  'ant',
-  'beetle',
-  'queen',
-  'grasshopper',
-  'spider',
+  'ant' = 'Ant',
+  'beetle' = 'Beetle',
+  'queen' = 'Queen Bee',
+  'grasshopper' = 'Grasshopper',
+  'spider' = 'Spider',
 }
 
 export type Board = {
@@ -74,7 +78,52 @@ export const gameMachine = Machine<Context, Schema, Event>({
     // Game-specific context
     cellsOnBoard: startCells,
     currentPlayer: 1,
-    unplacedInsectsPlayer1: [],
+    unplacedInsectsPlayer1: [
+      {
+        name: InsectName.queen,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.ant,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.ant,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.ant,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.beetle,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.beetle,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.spider,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.spider,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.grasshopper,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.grasshopper,
+        validCells: () => [],
+      },
+      {
+        name: InsectName.grasshopper,
+        validCells: () => [],
+      },
+    ],
     unplacedInsectsPlayer2: [],
     // Turn-specific context
     selectedPiece: null,
@@ -88,7 +137,7 @@ export const gameMachine = Machine<Context, Schema, Event>({
       entry: assign((_) => ({
         // Select start player (propose random, animated in UI as coin flip or something)
         // Set initial pieces for both players
-        unplacedInsectsPlayer1: [],
+        // unplacedInsectsPlayer1: [],
         unplacedInsectsPlayer2: [],
       })),
       always: 'playing',
@@ -104,7 +153,7 @@ export const gameMachine = Machine<Context, Schema, Event>({
       always: [
         {
           target: 'gameOver',
-          cond: '' /* Conditional logic to check if queen is surrounded */,
+          cond: false /* Conditional logic to check if queen is surrounded */,
         },
         { target: 'alternating' },
       ],

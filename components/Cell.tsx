@@ -28,7 +28,9 @@ const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
         className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
         onClick={() => sendToGame(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
       >
-        <div className="cell_clip">{isSelected && 'selected'}</div>
+        <div className="cell_clip">
+          {cell.insects.length ? JSON.stringify(cell.insects, null, 2) : ''}
+        </div>
       </div>
     </div>
   )

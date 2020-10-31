@@ -1,4 +1,5 @@
 import { assign } from 'xstate'
+import { haveSameCubeCoordinates } from '../lib/hex'
 import { Insect, Cell } from './game'
 
 export interface TurnContext {
@@ -21,7 +22,7 @@ export interface TurnStateSchema {
 
 export type TurnEvent =
   | { type: 'SELECT'; cell: Cell }
-  | { type: 'PLACE' }
+  | { type: 'PLACE'; insect: Insect }
   | { type: 'MOVE' }
   | { type: 'UNSELECT' }
 
@@ -49,7 +50,10 @@ export const turnMachine: TurnStateSchema = {
       on: {
         // Dont know if it is possible to add identifier selected piece to the event but that would be the goal
         // That or listener that links to function that sets the context
-        PLACE: { target: 'placing' },
+        PLACE: {
+          target: 'placing',
+          cond: (context) => context.selectedPiece,
+        },
         MOVE: { target: 'moving' },
         // Player selects a different piece
         SELECT: {
@@ -79,6 +83,17 @@ export const turnMachine: TurnStateSchema = {
       // Animation to be played in frontend while in this state
       entry: assign({
         cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
+        cellsOnBoard: (context, event) => {
+          console.log('cellsOnBoard', event)
+          console.log('context.selectedPiece', context)
+          const cellIndexToUpdate = context.cellsOnBoard.findIndex((cell) =>
+            haveSameCubeCoordinates(cell.coord, context.selectedPiece.coord)
+          )
+          console.log('cellIndexToUpdate', cellIndexToUpdate)
+          const copy = context.cellsOnBoard
+          copy[cellIndexToUpdate].insects.push(event.insect)
+          return copy
+        },
       }),
       after: {
         // After a 1s animation, go to finished state

@@ -1,10 +1,11 @@
 import Head from 'next/head'
-
-import Board from '../components/Board'
-
 import { useContext } from 'react'
 
 import { gameContext } from '../context/machines'
+import Board from '../components/Board'
+import InsectSelector from '../components/InsectSelector'
+
+import { InsectName } from '../machines/game'
 
 export default function Home() {
   const [gameState] = useContext(gameContext)
@@ -17,7 +18,16 @@ export default function Home() {
       </Head>
 
       <main>
-        <Board cells={gameState.context.cellsOnBoard} />
+        <div className="game" style={{ width: '100%' }}>
+          <div className="board-wrapper">
+            <Board cells={gameState.context.cellsOnBoard} />
+          </div>
+          <div className="insect-selector">
+            <InsectSelector
+              insects={gameState.context.unplacedInsectsPlayer1}
+            />
+          </div>
+        </div>
       </main>
     </>
   )

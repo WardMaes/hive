@@ -9,6 +9,10 @@
   gap: var(--grid-gap) calc(var(--grid-gap) * 2);
 }
 
+.board-wrapper {
+  padding-bottom: 200px;
+}
+
 .cell {
   width: 100%;
   position: relative;
@@ -48,4 +52,21 @@
 
 .cell-z {
   z-index: -1;
+}
+
+.insect-selector {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background-color: #ddd;
+  padding: 1rem;
+}
+
+.insect {
+  cursor: pointer;
+  display: block;
+  border: 1px solid darkgray;
+  padding: 1rem;
 }
