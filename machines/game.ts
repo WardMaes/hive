@@ -1,6 +1,7 @@
 import { Machine, assign } from 'xstate'
 
 import { HexCoord } from '../lib/hex'
+import { Insect } from "../lib/insect"
 import { turnMachine, TurnContext, TurnEvent } from './turn'
 
 const startCells: Cell[] = [
@@ -13,14 +14,6 @@ const startCells: Cell[] = [
   { coord: { x: 1, y: -1, z: 0 }, insects: [] }, // bottom right
 ]
 
-export enum InsectName {
-  'ant',
-  'beetle',
-  'queen',
-  'grasshopper',
-  'spider',
-}
-
 export type Board = {
   cells: Cell[]
 }
@@ -28,11 +21,6 @@ export type Board = {
 export type Cell = {
   coord: HexCoord
   insects: Insect[]
-}
-
-export type Insect = {
-  name: InsectName
-  validCells: () => Cell[]
 }
 
 export type Context = GameContext & TurnContext
