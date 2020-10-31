@@ -4,6 +4,12 @@ export type HexCoord = {
   z: number
 }
 
+export type Move = {
+  length: number
+  destination: HexCoord
+  path: HexCoord[]
+}
+
 const hasValidCubeCoordinate = (hexCoord: HexCoord): Boolean => {
   return hexCoord.x + hexCoord.y + hexCoord.z == 0
 }
@@ -42,6 +48,115 @@ const filterOverlap = (
   return coordsA.filter((coordA) =>
     coordsB.find((coordB) => !haveSameCubeCoordinates(coordA, coordB))
   )
+}
+
+export const walkPerimeter = (
+  coord: HexCoord,
+  otherHexs: HexCoord[],
+  max_distance = Infinity,
+  path: HexCoord[] = [],
+  discovered: Set<HexCoord> = new Set()
+): Move[] => {
+  // const discovered: Set<HexCoord> = new Set()
+  // const destinationsByDistance: Map<number, HexCoord[]> = new Map()
+  // const reachableStack = [coord]
+
+  if (max_distance <= 0) {
+    return []
+  }
+
+  path.push(coord)
+  // Geen fan van
+  const lookUp = hexCoordsToLookupTable(otherHexs)
+
+  const isOccupied = ({ x, y, z }: HexCoord) => {
+    return x in lookUp && y in lookUp[x] && z in lookUp[x][y]
+  }
+
+  const neighbors = getNeighbours(coord)
+  let notYetDiscovered = neighbors.filter((value) => !discovered.has(value))
+  let unoccupied = notYetDiscovered.filter((value) => {
+    return !isOccupied(value)
+  })
+  let notTooNarrowAndTouchesHive = unoccupied.filter((value) => {
+    // Find direction of the move
+    const neighborIndex = neighbors.findIndex((value) =>
+      haveSameCubeCoordinates(value, coord)
+    )
+    const leftNeighborOccupied = isOccupied(neighbors[neighborIndex - (1 % 6)])
+    const rightNeighborOccupied = isOccupied(neighbors[neighborIndex + (1 % 6)])
+    return (
+      (leftNeighborOccupied && !rightNeighborOccupied) ||
+      (!leftNeighborOccupied && rightNeighborOccupied)
+    )
+  })
+
+  const discoveredMoves: Move[] = []
+  notTooNarrowAndTouchesHive.forEach((coord) => {
+    discovered.add(coord)
+    discoveredMoves.push({
+      length: path.length + 1,
+      destination: coord,
+      path: [...path, coord],
+    })
+    discoveredMoves.push(
+      ...walkPerimeter(
+        coord,
+        otherHexs,
+        max_distance - 1,
+        [...path, coord],
+        discovered
+      )
+    )
+  })
+  return discoveredMoves
+
+  // let distance = 1
+
+  // while (reachableStack.length > 0 && distance <= max_distance) {
+  //   // const coord = reachableStack.shift()!
+  //   const neighbors = getNeighbours(coord)
+
+  //   // let touchHive = unoccupied.filter((value) => {
+  //   //   getNeighbours(value)
+  //   //     // Find neighbors which are occupied
+  //   //     .filter((value) => isOccupied(value))
+  //   //     // Remove the location where is being moved from
+  //   //     .filter((value) => !haveSameCubeCoordinates(value, coord))
+  //   //     // So if a coordinate is occupied and it is not the original coordinate it is part of the hive making any free neighboring
+  //   //     // coordinate of it a valid position to stay connected to the hive
+  //   //     .length > 0
+  //   // })
+
+  //   notTooNarrowAndTouchesHive.forEach((value) => discovered.add(value))
+  //   destinationsByDistance.set(distance, notTooNarrowAndTouchesHive)
+
+  //   distance += 1
+  // }
+}
+
+const hexCoordsToLookupTable = <T>(
+  hexCoords: HexCoord[],
+  corresponding?: T[]
+): { [x: number]: { [y: number]: { [z: number]: T[] | null } } } => {
+  const table: {
+    [x: number]: { [y: number]: { [z: number]: T[] | null } }
+  } = {}
+  for (const [idx, coord] of hexCoords.entries()) {
+    const { x, y, z } = coord
+    if (!(x in table)) {
+      table[x] = {}
+    }
+    if (!(y in table[x])) {
+      table[x][y] = {}
+    }
+    if (!(z in table[x][y])) {
+      table[x][y][z] = !corresponding ? null : [corresponding[idx]]
+    } else if (!corresponding) {
+      table[x][y][z]!.push(corresponding![idx])
+    }
+  }
+  return table
 }
 
 export {
