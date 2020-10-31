@@ -7,7 +7,7 @@ import { useContext } from 'react'
 import { gameContext } from '../context/machines'
 
 export default function Home() {
-  const [gameState, sendToGame] = useContext(gameContext)
+  const [gameState] = useContext(gameContext)
 
   return (
     <>
@@ -17,7 +17,7 @@ export default function Home() {
       </Head>
 
       <main>
-        <Board cells={gameState.context.cellsPlacedPieces} />
+        <Board cells={gameState.context.cellsOnBoard} />
       </main>
     </>
   )

@@ -1,24 +1,26 @@
 import React, { useContext } from 'react'
 
-import { turnContext } from '../context/machines'
+import { gameContext } from '../context/machines'
 
-import { haveSameCubeCoordinates, Cell as CellType } from '../lib/hex'
+import { haveSameCubeCoordinates } from '../lib/hex'
+
+import { Cell as CellType } from '../machines/game'
 
 type CellProps = {
   cell: CellType
 }
 
 const Cell = ({ cell }: CellProps) => {
-  const [turnState, sendToTurn] = useContext(turnContext)
+  const [gameState, sendToGame] = useContext(gameContext)
 
-  const selectedPiece = turnState.context.selectedPiece
+  const selectedPiece = gameState.context.selectedPiece
   const isSelected =
-    selectedPiece && haveSameCubeCoordinates(selectedPiece, cell)
+    selectedPiece && haveSameCubeCoordinates(selectedPiece.coord, cell.coord)
 
   return (
     <div
       className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
-      onClick={() => sendToTurn(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
+      onClick={() => sendToGame(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
     >
       <div className="cell_clip">{isSelected && 'selected'}</div>
     </div>

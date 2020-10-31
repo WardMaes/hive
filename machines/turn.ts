@@ -1,6 +1,5 @@
-import { Machine, assign } from 'xstate'
-import { Cell } from '../lib/hex'
-import { Insect } from './game'
+import { assign } from 'xstate'
+import { Insect, Cell } from './game'
 
 export interface TurnContext {
   selectedPiece: Cell | null
@@ -9,7 +8,8 @@ export interface TurnContext {
   piecesAllowedToBePlaced: Insect[]
 }
 
-interface TurnStateSchema {
+export interface TurnStateSchema {
+  initial: 'initializing'
   states: {
     initializing: {}
     selecting: {}
@@ -25,16 +25,8 @@ export type TurnEvent =
   | { type: 'MOVE' }
   | { type: 'UNSELECT' }
 
-export const turnMachine = Machine<TurnContext, TurnStateSchema, TurnEvent>({
-  id: 'turn',
+export const turnMachine: TurnStateSchema = {
   initial: 'initializing',
-  context: {
-    selectedPiece: null,
-    cellsPossibleDestinationsCurrentMove: [],
-    // 'piecesAllowedToBeMoved' and 'piecesAllowedToBePlaced' could maybe be merged into 1 property 'piecesAllowedToBePlayed'
-    piecesAllowedToBeMoved: [],
-    piecesAllowedToBePlaced: [],
-  },
   states: {
     initializing: {
       entry: assign({
@@ -62,7 +54,8 @@ export const turnMachine = Machine<TurnContext, TurnStateSchema, TurnEvent>({
         // Player selects a different piece
         SELECT: {
           actions: assign({
-            selectedPiece: (_, event) => event.cell,
+            selectedPiece: (_, event: { type: 'SELECT'; cell: Cell }) =>
+              event.cell,
             cellsPossibleDestinationsCurrentMove: (_) => {
               // Calculate which cells the player can click to place the selectedPiece
               return []
@@ -107,4 +100,4 @@ export const turnMachine = Machine<TurnContext, TurnStateSchema, TurnEvent>({
       type: 'final', // This will notify parent machine the current turn is over
     },
   },
-})
+}

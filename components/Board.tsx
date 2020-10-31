@@ -1,4 +1,5 @@
-import { Cell as CellType } from './../lib/hex'
+import { HexCoord } from '../lib/hex'
+import { Cell as CellType } from '../machines/game'
 import Cell from './Cell'
 
 type BoardCoordinate = {
@@ -13,23 +14,21 @@ type BoardProps = {
 const Board = ({ cells }: BoardProps) => {
   // Calculating properties to calculate size of board as a grid and to map coordinates
   const minXCoordinate = cells.reduce(
-    (acc, current) => (acc = Math.min(acc, current.x)),
+    (acc, { coord }) => (acc = Math.min(acc, coord.x)),
     +Infinity
   )
   const minYZCoordinate = cells.reduce(
-    (acc, current) => (acc = Math.min(acc, -(current.y - current.z))),
+    (acc, { coord }) => (acc = Math.min(acc, -(coord.y - coord.z))),
     +Infinity
   )
   const maxXCoordinate = cells.reduce(
-    (acc, current) => (acc = Math.max(acc, current.x)),
+    (acc, { coord }) => (acc = Math.max(acc, coord.x)),
     -Infinity
   )
-  // const maxYZCoordinate = cells.reduce((acc, current) => acc = Math.max(acc, -(current.y - current.z)), -Infinity)
   const totalCols = maxXCoordinate - minXCoordinate + 1
-  // const totalRows = maxYZCoordinate - minYZCoordinate + 1
 
   const convertCellToGridLocation = (
-    cell: CellType,
+    cell: HexCoord,
     minXCoordinate: number,
     minYZCoordinate: number
   ): BoardCoordinate => {
@@ -48,7 +47,7 @@ const Board = ({ cells }: BoardProps) => {
     >
       {cells.map((cell) => {
         const { row, col } = convertCellToGridLocation(
-          cell,
+          cell.coord,
           minXCoordinate,
           minYZCoordinate
         )
@@ -62,7 +61,7 @@ const Board = ({ cells }: BoardProps) => {
               gridColumnStart,
               gridRowStart,
             }}
-            key={`${cell.x}-${cell.y}-${cell.z}`}
+            key={`${cell.coord.x}-${cell.coord.y}-${cell.coord.z}`}
           >
             <Cell cell={cell} />
           </div>
