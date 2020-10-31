@@ -45,3 +45,7 @@
   background-color: lightgray;
   text-align: center; /* For debugging purposes */
 }
+
+.cell-z {
+  z-index: -1;
+}

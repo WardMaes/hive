@@ -55,16 +55,12 @@ const Board = ({ cells }: BoardProps) => {
         const gridRowStart = row + 1
 
         return (
-          <div
-            className={'cell'}
-            style={{
-              gridColumnStart,
-              gridRowStart,
-            }}
+          <Cell
+            cell={cell}
             key={`${cell.coord.x}-${cell.coord.y}-${cell.coord.z}`}
-          >
-            <Cell cell={cell} />
-          </div>
+            gridColumnStart={gridColumnStart}
+            gridRowStart={gridRowStart}
+          />
         )
       })}
     </div>

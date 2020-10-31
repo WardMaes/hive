@@ -8,9 +8,11 @@ import { Cell as CellType } from '../machines/game'
 
 type CellProps = {
   cell: CellType
+  gridColumnStart: number
+  gridRowStart: number
 }
 
-const Cell = ({ cell }: CellProps) => {
+const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
   const selectedPiece = gameState.context.selectedPiece
@@ -19,10 +21,15 @@ const Cell = ({ cell }: CellProps) => {
 
   return (
     <div
-      className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
-      onClick={() => sendToGame(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
+      className={'cell' + (isSelected ? ' cell-z' : '')}
+      style={{ gridColumnStart, gridRowStart }}
     >
-      <div className="cell_clip">{isSelected && 'selected'}</div>
+      <div
+        className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
+        onClick={() => sendToGame(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
+      >
+        <div className="cell_clip">{isSelected && 'selected'}</div>
+      </div>
     </div>
   )
 }
