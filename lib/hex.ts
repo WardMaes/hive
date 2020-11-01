@@ -51,29 +51,62 @@ const filterOverlap = (
 }
 
 export const walkPerimeter = (
-  coord: HexCoord,
+  startCoord: HexCoord,
   otherHexs: HexCoord[],
-  max_distance = Infinity,
-  path: HexCoord[] = [],
-  discovered: Set<HexCoord> = new Set()
+  max_distance = Infinity
 ): Move[] => {
+  // Create lookup table
+  const lookUp = hexCoordsToLookupTable<null>(otherHexs)
+  const discovered: Set<HexCoord> = new Set()
+  // Path keeps record of traveled path
+  // All neighbors discovered to be new destinations have previous coordinate in common so push it on the path
+  const path = [ startCoord ]
+
+  return recursiveFindPerimeterNeighbors(startCoord, lookUp, max_distance, path, discovered)
+  // TODO remove after testing
   // const discovered: Set<HexCoord> = new Set()
   // const destinationsByDistance: Map<number, HexCoord[]> = new Map()
   // const reachableStack = [coord]
+  // let distance = 1
+  // while (reachableStack.length > 0 && distance <= max_distance) {
+  //   // const coord = reachableStack.shift()!
+  //   const neighbors = getNeighbours(coord)
+  //   // let touchHive = unoccupied.filter((value) => {
+  //   //   getNeighbours(value)
+  //   //     // Find neighbors which are occupied
+  //   //     .filter((value) => isOccupied(value))
+  //   //     // Remove the location where is being moved from
+  //   //     .filter((value) => !haveSameCubeCoordinates(value, coord))
+  //   //     // So if a coordinate is occupied and it is not the original coordinate it is part of the hive making any free neighboring
+  //   //     // coordinate of it a valid position to stay connected to the hive
+  //   //     .length > 0
+  //   // })
+  //   notTooNarrowAndTouchesHive.forEach((value) => discovered.add(value))
+  //   destinationsByDistance.set(distance, notTooNarrowAndTouchesHive)
+  //   distance += 1
+  // }
+}
 
+const recursiveFindPerimeterNeighbors = (
+  currentCoord: HexCoord,
+  lookUp: HexLookupTable<null>,
+  // otherHexs: HexCoord[],
+  max_distance = Infinity,
+  path: HexCoord[] = [],
+  discovered: Set<HexCoord>
+): Move[] => {
+  // Base case where maximum distance has been explored
   if (max_distance <= 0) {
     return []
   }
-
-  path.push(coord)
-  // Geen fan van
-  const lookUp = hexCoordsToLookupTable(otherHexs)
+  
+  // path.push(currentCoord)
 
   const isOccupied = ({ x, y, z }: HexCoord) => {
     return x in lookUp && y in lookUp[x] && z in lookUp[x][y]
   }
 
-  const neighbors = getNeighbours(coord)
+  const neighbors = getNeighbours(currentCoord)
   let notYetDiscovered = neighbors.filter((value) => !discovered.has(value))
   let unoccupied = notYetDiscovered.filter((value) => {
     return !isOccupied(value)
@@ -81,7 +114,7 @@ export const walkPerimeter = (
   let notTooNarrowAndTouchesHive = unoccupied.filter((value) => {
     // Find direction of the move
     const neighborIndex = neighbors.findIndex((value) =>
-      haveSameCubeCoordinates(value, coord)
+      haveSameCubeCoordinates(value, currentCoord)
     )
     const leftNeighborOccupied = isOccupied(neighbors[neighborIndex - (1 % 6)])
     const rightNeighborOccupied = isOccupied(neighbors[neighborIndex + (1 % 6)])
@@ -100,9 +133,9 @@ export const walkPerimeter = (
       path: [...path, coord],
     })
     discoveredMoves.push(
-      ...walkPerimeter(
+      ...recursiveFindPerimeterNeighbors(
         coord,
-        otherHexs,
+        lookUp,
         max_distance - 1,
         [...path, coord],
         discovered
@@ -110,35 +143,13 @@ export const walkPerimeter = (
     )
   })
   return discoveredMoves
-
-  // let distance = 1
-
-  // while (reachableStack.length > 0 && distance <= max_distance) {
-  //   // const coord = reachableStack.shift()!
-  //   const neighbors = getNeighbours(coord)
-
-  //   // let touchHive = unoccupied.filter((value) => {
-  //   //   getNeighbours(value)
-  //   //     // Find neighbors which are occupied
-  //   //     .filter((value) => isOccupied(value))
-  //   //     // Remove the location where is being moved from
-  //   //     .filter((value) => !haveSameCubeCoordinates(value, coord))
-  //   //     // So if a coordinate is occupied and it is not the original coordinate it is part of the hive making any free neighboring
-  //   //     // coordinate of it a valid position to stay connected to the hive
-  //   //     .length > 0
-  //   // })
-
-  //   notTooNarrowAndTouchesHive.forEach((value) => discovered.add(value))
-  //   destinationsByDistance.set(distance, notTooNarrowAndTouchesHive)
-
-  //   distance += 1
-  // }
 }
 
+type HexLookupTable<T> =  { [x: number]: { [y: number]: { [z: number]: T[] | null } } }
 const hexCoordsToLookupTable = <T>(
   hexCoords: HexCoord[],
   corresponding?: T[]
-): { [x: number]: { [y: number]: { [z: number]: T[] | null } } } => {
+): HexLookupTable<T> => {
   const table: {
     [x: number]: { [y: number]: { [z: number]: T[] | null } }
   } = {}
