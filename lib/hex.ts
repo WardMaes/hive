@@ -57,12 +57,18 @@ export const walkPerimeter = (
 ): Move[] => {
   // Create lookup table
   const lookUp = hexCoordsToLookupTable<null>(otherHexs)
-  const discovered: Set<HexCoord> = new Set()
+  const discovered: Set<HexCoord> = new Set([startCoord])
   // Path keeps record of traveled path
   // All neighbors discovered to be new destinations have previous coordinate in common so push it on the path
-  const path = [ startCoord ]
+  const path = [startCoord]
 
-  return recursiveFindPerimeterNeighbors(startCoord, lookUp, max_distance, path, discovered)
+  return recursiveFindPerimeterNeighbors(
+    startCoord,
+    lookUp,
+    max_distance,
+    path,
+    discovered
+  )
   // TODO remove after testing
   // const discovered: Set<HexCoord> = new Set()
   // const destinationsByDistance: Map<number, HexCoord[]> = new Map()
@@ -99,18 +105,21 @@ const recursiveFindPerimeterNeighbors = (
   if (max_distance <= 0) {
     return []
   }
-  
-  // path.push(currentCoord)
 
   const isOccupied = ({ x, y, z }: HexCoord) => {
     return x in lookUp && y in lookUp[x] && z in lookUp[x][y]
   }
 
   const neighbors = getNeighbours(currentCoord)
+  // Check which neighbors were already discovered by a shorter path (since breadth first is used)
   let notYetDiscovered = neighbors.filter((value) => !discovered.has(value))
+  // Check which aren't occupied
   let unoccupied = notYetDiscovered.filter((value) => {
     return !isOccupied(value)
   })
+  // Pieces cant move through "holes" in the hive where, assuming the neighbor you're trying to move to is direction X,
+  // the neighbors at X - 60° and X + 60° are occupied
+  // But if neither is occupied, that means that the destination move no longer touches the hive, which is also illegal
   let notTooNarrowAndTouchesHive = unoccupied.filter((value) => {
     // Find direction of the move
     const neighborIndex = neighbors.findIndex((value) =>
@@ -145,7 +154,9 @@ const recursiveFindPerimeterNeighbors = (
   return discoveredMoves
 }
 
-type HexLookupTable<T> =  { [x: number]: { [y: number]: { [z: number]: T[] | null } } }
+type HexLookupTable<T> = {
+  [x: number]: { [y: number]: { [z: number]: T[] | null } }
+}
 const hexCoordsToLookupTable = <T>(
   hexCoords: HexCoord[],
   corresponding?: T[]
