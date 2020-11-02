@@ -58,7 +58,7 @@ type HexLookupTable<T> = {
   [x: number]: { [y: number]: { [z: number]: T[] | null } }
 }
 
-const hexCoordsToLookupTable = <T>(
+export const hexCoordsToLookupTable = <T>(
   hexCoords: HexCoord[],
   corresponding?: T[]
 ): HexLookupTable<T> => {
@@ -244,6 +244,46 @@ export const walkPerimeter = (
   }
   // Skip the first where the piece isn't moved since it isn't a valid move
   return foundMoves.slice(1)
+}
+
+/* 
+  Axis
+*/
+
+// Return arrays for each direction, on each axis, with other coordinates on that axis, ordered by distance
+export enum Axis {
+  X,
+  Y,
+  Z,
+}
+
+export enum AxisDirection {
+  PLUS,
+  MINUS,
+}
+
+export const shiftAlongAxis = (
+  coord: HexCoord,
+  axis: Axis,
+  direction: AxisDirection,
+  distance: number = 1
+): HexCoord => {
+  const coordCopy = { ...coord }
+
+  const modifier: number = direction === AxisDirection.PLUS ? 1 : -1
+
+  if (axis === Axis.X) {
+    coordCopy.y = coordCopy.y + modifier * distance
+    coordCopy.z = coordCopy.z - modifier * distance
+  } else if (axis === Axis.Y) {
+    coordCopy.x = coordCopy.x + modifier * distance
+    coordCopy.z = coordCopy.z - modifier * distance
+  } else {
+    coordCopy.x = coordCopy.x + modifier * distance
+    coordCopy.y = coordCopy.y - modifier * distance
+  }
+
+  return coordCopy
 }
 
 export {
