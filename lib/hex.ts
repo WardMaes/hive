@@ -50,12 +50,48 @@ const filterOverlap = (
   )
 }
 
+/* 
+  Lookup table
+*/
+
+type HexLookupTable<T> = {
+  [x: number]: { [y: number]: { [z: number]: T[] | null } }
+}
+
+const hexCoordsToLookupTable = <T>(
+  hexCoords: HexCoord[],
+  corresponding?: T[]
+): HexLookupTable<T> => {
+  const table: {
+    [x: number]: { [y: number]: { [z: number]: T[] | null } }
+  } = {}
+  for (const [idx, coord] of hexCoords.entries()) {
+    const { x, y, z } = coord
+    if (!(x in table)) {
+      table[x] = {}
+    }
+    if (!(y in table[x])) {
+      table[x][y] = {}
+    }
+    if (!(z in table[x][y])) {
+      table[x][y][z] = !corresponding ? null : [corresponding[idx]]
+    } else if (!corresponding) {
+      table[x][y][z]!.push(corresponding![idx])
+    }
+  }
+  return table
+}
+
 export const checkOccupationInLookupTable = <T>(
   { x, y, z }: HexCoord,
   lookUp: HexLookupTable<T>
 ): Boolean => {
   return x in lookUp && y in lookUp[x] && z in lookUp[x][y]
 }
+
+/* 
+  Articulation
+*/
 
 export const isHexCoordinateArticulationPoint = (
   coord: HexCoord,
@@ -94,6 +130,54 @@ export const isHexCoordinateArticulationPoint = (
   return uniqueOtherHexs.size > 0
 }
 
+// type HexCoordGraphNode = {
+//   value: HexCoord,
+//   neighbors: HexCoord[]
+// }
+
+// TODO implement more efficient connected modules in graph algorithm to find all articulation points
+const getArticulationPointsHexCoordinates = (hexCoords: HexCoord[]) => {
+  // Remove duplicates
+  // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
+  const uniqueOtherHexs = new Set(hexCoords)
+  // Is graph algorithm so convert graph (easier to work with and avoids converting all the time)
+
+  const startHexCoord = hexCoords[0]
+
+  const discovered: Set<HexCoord> = new Set()
+  const preOrderFoundCounterLookup = new Map<HexCoord, number>()
+  const lowestDiscIndexReachableMap = new Map<HexCoord, number>()
+
+  getArticulationPointsHexCoordinatesRecHelper(
+    startHexCoord,
+    null,
+    discovered,
+    preOrderFoundCounterLookup,
+    lowestDiscIndexReachableMap
+  )
+}
+
+const getArticulationPointsHexCoordinatesRecHelper = (
+  coord: HexCoord,
+  parent: HexCoord | null,
+  discovered: Set<HexCoord>,
+  preOrderFoundCounterLookup: Map<HexCoord, number>,
+  lowestDiscIndexReachableMap: Map<HexCoord, number>
+) => {
+  discovered.add(coord)
+  // Will save number which indicates when iteration it was discovered
+  const preOrderIndex = preOrderFoundCounterLookup.size
+  preOrderFoundCounterLookup.set(coord, preOrderIndex)
+  // Initially, the furthest reachable node is set as itself
+  lowestDiscIndexReachableMap.set(coord, preOrderIndex)
+
+  getNeighbours(coord).filter((el) => checkOccupationInLookupTable(el, lo))
+}
+
+/* 
+  Perimeter walking
+*/
+
 export const walkPerimeter = (
   startCoord: HexCoord,
   otherHexs: HexCoord[],
@@ -113,28 +197,6 @@ export const walkPerimeter = (
     path,
     discovered
   )
-  // TODO remove after testing
-  // const discovered: Set<HexCoord> = new Set()
-  // const destinationsByDistance: Map<number, HexCoord[]> = new Map()
-  // const reachableStack = [coord]
-  // let distance = 1
-  // while (reachableStack.length > 0 && distance <= max_distance) {
-  //   // const coord = reachableStack.shift()!
-  //   const neighbors = getNeighbours(coord)
-  //   // let touchHive = unoccupied.filter((value) => {
-  //   //   getNeighbours(value)
-  //   //     // Find neighbors which are occupied
-  //   //     .filter((value) => isOccupied(value))
-  //   //     // Remove the location where is being moved from
-  //   //     .filter((value) => !haveSameCubeCoordinates(value, coord))
-  //   //     // So if a coordinate is occupied and it is not the original coordinate it is part of the hive making any free neighboring
-  //   //     // coordinate of it a valid position to stay connected to the hive
-  //   //     .length > 0
-  //   // })
-  //   notTooNarrowAndTouchesHive.forEach((value) => discovered.add(value))
-  //   destinationsByDistance.set(distance, notTooNarrowAndTouchesHive)
-  //   distance += 1
-  // }
 }
 
 const recursiveFindPerimeterNeighbors = (
@@ -196,33 +258,6 @@ const recursiveFindPerimeterNeighbors = (
     )
   })
   return discoveredMoves
-}
-
-type HexLookupTable<T> = {
-  [x: number]: { [y: number]: { [z: number]: T[] | null } }
-}
-const hexCoordsToLookupTable = <T>(
-  hexCoords: HexCoord[],
-  corresponding?: T[]
-): HexLookupTable<T> => {
-  const table: {
-    [x: number]: { [y: number]: { [z: number]: T[] | null } }
-  } = {}
-  for (const [idx, coord] of hexCoords.entries()) {
-    const { x, y, z } = coord
-    if (!(x in table)) {
-      table[x] = {}
-    }
-    if (!(y in table[x])) {
-      table[x][y] = {}
-    }
-    if (!(z in table[x][y])) {
-      table[x][y][z] = !corresponding ? null : [corresponding[idx]]
-    } else if (!corresponding) {
-      table[x][y][z]!.push(corresponding![idx])
-    }
-  }
-  return table
 }
 
 export {
