@@ -1,10 +1,10 @@
 import Head from 'next/head'
-
-import Board from '../components/Board'
-
 import { useContext } from 'react'
 
 import { gameContext } from '../context/machines'
+
+import Board from '../components/Board'
+import Menu from '../components/Menu'
 
 export default function Home() {
   const [gameState] = useContext(gameContext)
@@ -17,7 +17,10 @@ export default function Home() {
       </Head>
 
       <main>
-        <Board cells={gameState.context.cellsOnBoard} />
+        {gameState.matches('menu') && <Menu />}
+        {gameState.matches('playing') && (
+          <Board cells={gameState.context.cellsOnBoard} />
+        )}
       </main>
     </>
   )

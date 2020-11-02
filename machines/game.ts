@@ -47,11 +47,14 @@ export interface GameContext {
   unplacedInsectsPlayer2: Insect[]
 }
 
-export type GameEvent = { type: '' }
+export type GameEvent =
+  | { type: 'GAME.JOIN'; code: string }
+  | { type: 'GAME.CREATE' }
 
 export interface Schema {
   states: {
     initializing: {}
+    menu: {}
     playing: {
       states: {
         initializing: {}
@@ -91,8 +94,20 @@ export const gameMachine = Machine<Context, Schema, Event>({
         unplacedInsectsPlayer1: [],
         unplacedInsectsPlayer2: [],
       })),
-      always: 'playing',
+      always: 'menu',
     },
+
+    menu: {
+      on: {
+        'GAME.JOIN': {
+          target: 'playing', // TODO: go to /rooms/[roomId]
+        },
+        'GAME.CREATE': {
+          target: 'playing', // TODO: create new room and go to /rooms/[roomId]
+        },
+      },
+    },
+
     playing: {
       ...turnMachine,
       onDone: {
