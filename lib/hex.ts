@@ -186,78 +186,64 @@ export const walkPerimeter = (
   // Create lookup table
   const lookUp = hexCoordsToLookupTable<null>(otherHexs)
   const discovered: Set<HexCoord> = new Set([startCoord])
-  // Path keeps record of traveled path
-  // All neighbors discovered to be new destinations have previous coordinate in common so push it on the path
-  const path = [startCoord]
+  let idx = 0
+  const foundMoves: Move[] = [
+    {
+      length: 0,
+      destination: startCoord,
+      path: [startCoord],
+    },
+  ]
 
-  return recursiveFindPerimeterNeighbors(
-    startCoord,
-    lookUp,
-    max_distance,
-    path,
-    discovered
-  )
-}
-
-const recursiveFindPerimeterNeighbors = (
-  currentCoord: HexCoord,
-  lookUp: HexLookupTable<null>,
-  // otherHexs: HexCoord[],
-  max_distance = Infinity,
-  path: HexCoord[] = [],
-  discovered: Set<HexCoord>
-): Move[] => {
-  // Base case where maximum distance has been explored
-  if (max_distance <= 0) {
-    return []
+  // Iterate over previously found paths and look if they can be expanded
+  while (idx < foundMoves.length) {
+    // Get preceding move
+    const {
+      length: prevLength,
+      destination: lastCoord,
+      path: prevPath,
+    } = foundMoves[idx]
+    // Dont look for larger paths if the maximum distance has been reached
+    if (!(prevLength + 1 >= max_distance)) {
+      const neighbors = getNeighbours(lastCoord)
+      // A neighbor is a valid position if
+      const validNeighbors = neighbors
+        // A shorter or equal length path to there hasn't already been found
+        .filter((coord) => !discovered.has(coord))
+        // Isn't occupied by another cell
+        .filter((coord) => !checkOccupationInLookupTable(coord, lookUp))
+        // Two part:
+        // If there are 2 neigbors at, with direction of move X, X - 60° and X + 60°; then it cant move naturally between these 2
+        // But if neither is present, then you no longer touch the orignal side and thus are no longer connected to the same perimeter
+        .filter((coord) => {
+          const neighborIndex = neighbors.findIndex((neighborCoord) =>
+            haveSameCubeCoordinates(neighborCoord, coord)
+          )
+          const leftNeighborOccupied = checkOccupationInLookupTable(
+            neighbors[neighborIndex - (1 % 6)],
+            lookUp
+          )
+          const rightNeighborOccupied = checkOccupationInLookupTable(
+            neighbors[neighborIndex + (1 % 6)],
+            lookUp
+          )
+          return (
+            (leftNeighborOccupied && !rightNeighborOccupied) ||
+            (!leftNeighborOccupied && rightNeighborOccupied)
+          )
+        })
+      validNeighbors.forEach((valid) => {
+        foundMoves.push({
+          length: prevLength + 1,
+          destination: valid,
+          path: [...prevPath, valid],
+        })
+      })
+    }
+    idx++
   }
-
-  const isOccupied = ({ x, y, z }: HexCoord) => {
-    return x in lookUp && y in lookUp[x] && z in lookUp[x][y]
-  }
-
-  const neighbors = getNeighbours(currentCoord)
-  // Check which neighbors were already discovered by a shorter path (since breadth first is used)
-  let notYetDiscovered = neighbors.filter((value) => !discovered.has(value))
-  // Check which aren't occupied
-  let unoccupied = notYetDiscovered.filter((value) => {
-    return !isOccupied(value)
-  })
-  // Pieces cant move through "holes" in the hive where, assuming the neighbor you're trying to move to is direction X,
-  // the neighbors at X - 60° and X + 60° are occupied
-  // But if neither is occupied, that means that the destination move no longer touches the hive, which is also illegal
-  let notTooNarrowAndTouchesHive = unoccupied.filter((value) => {
-    // Find direction of the move
-    const neighborIndex = neighbors.findIndex((value) =>
-      haveSameCubeCoordinates(value, currentCoord)
-    )
-    const leftNeighborOccupied = isOccupied(neighbors[neighborIndex - (1 % 6)])
-    const rightNeighborOccupied = isOccupied(neighbors[neighborIndex + (1 % 6)])
-    return (
-      (leftNeighborOccupied && !rightNeighborOccupied) ||
-      (!leftNeighborOccupied && rightNeighborOccupied)
-    )
-  })
-
-  const discoveredMoves: Move[] = []
-  notTooNarrowAndTouchesHive.forEach((coord) => {
-    discovered.add(coord)
-    discoveredMoves.push({
-      length: path.length + 1,
-      destination: coord,
-      path: [...path, coord],
-    })
-    discoveredMoves.push(
-      ...recursiveFindPerimeterNeighbors(
-        coord,
-        lookUp,
-        max_distance - 1,
-        [...path, coord],
-        discovered
-      )
-    )
-  })
-  return discoveredMoves
+  // Skip the first where the piece isn't moved since it isn't a valid move
+  return foundMoves.slice(1)
 }
 
 export {
