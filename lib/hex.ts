@@ -50,6 +50,50 @@ const filterOverlap = (
   )
 }
 
+export const checkOccupationInLookupTable = <T>(
+  { x, y, z }: HexCoord,
+  lookUp: HexLookupTable<T>
+): Boolean => {
+  return x in lookUp && y in lookUp[x] && z in lookUp[x][y]
+}
+
+export const isHexCoordinateArticulationPoint = (
+  coord: HexCoord,
+  otherHexs: HexCoord[]
+): Boolean => {
+  // Checks whether, if the given coordinate would be removed, the graph of hexes would be split in more, no longer connected graphs
+  // Super simple but quite inefficient: remove tested hex coordinate from all hexes, take random starting point, explore graph and check whether each other hex can be reached
+
+  // Remove duplicates
+  // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
+  const uniqueOtherHexs = new Set(otherHexs)
+  // Remove tested hex if it is present
+  uniqueOtherHexs.delete(coord)
+  // Select random starting point
+  const start = Array.from(uniqueOtherHexs.values())[0]
+  // Remove random starting point indicating it as discoverd
+  uniqueOtherHexs.delete(start)
+  const lookUp = hexCoordsToLookupTable(otherHexs)
+  // const discovered: Set<HexCoord> = new Set([ start ])
+  const queue = [start]
+
+  while (queue.length > 0) {
+    const current = queue.shift()
+    const currentNeighbors = getNeighbours(current!).filter((el) =>
+      checkOccupationInLookupTable(el, lookUp)
+    )
+    const undiscoverdNeighbors = currentNeighbors.filter((el) =>
+      uniqueOtherHexs.has(el)
+    )
+    undiscoverdNeighbors.forEach((el) => {
+      uniqueOtherHexs.delete(el)
+      queue.push(el)
+    })
+  }
+
+  return uniqueOtherHexs.size > 0
+}
+
 export const walkPerimeter = (
   startCoord: HexCoord,
   otherHexs: HexCoord[],
