@@ -12,8 +12,12 @@ const InsectSelector = ({ insects }: InsectSelectorProps) => {
 
   return (
     <div className="flex flex-row justify-center content-center h-full flex-wrap">
-      {insects.map((insect) => (
-        <div className="insect" onClick={() => sendToGame('PLACE', { insect })}>
+      {insects.map((insect, i) => (
+        <div
+          className="insect"
+          key={i + 1}
+          onClick={() => sendToGame('PLACE', { insect })}
+        >
           {JSON.stringify(insect, null, 2)}
         </div>
       ))}
