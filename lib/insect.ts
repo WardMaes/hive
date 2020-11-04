@@ -7,6 +7,7 @@ import {
   hexCoordsToLookupTable,
   checkOccupationInLookupTable,
   shiftAlongAxis,
+  getNeighbours,
 } from '../lib/hex'
 
 export enum InsectName {
@@ -98,4 +99,17 @@ export const Grasshopper: Insect = {
     })
     return validMoves
   },
+}
+
+const isSurrounded = (cell: Cell, allCells: Cell[]): Boolean => {
+  const { coord } = cell
+  const allCoords = allCells.map((cell) => cell.coord)
+
+  const lookUp = hexCoordsToLookupTable<null>(allCoords)
+  const neighbors = getNeighbours(coord)
+  return (
+    neighbors.filter(
+      (neighbor) => !checkOccupationInLookupTable(neighbor, lookUp)
+    ).length == 0
+  )
 }
