@@ -34,7 +34,7 @@ const haveSameCubeCoordinates = (
   return coordA.x == coordB.x && coordA.y == coordB.y && coordA.z == coordB.z
 }
 
-const uniqueCells = (cells: HexCoord[]): HexCoord[] => {
+const uniqueCoordinates = (cells: HexCoord[]): HexCoord[] => {
   return cells.filter(
     (cell, i, array) =>
       array.findIndex((a) => haveSameCubeCoordinates(a, cell)) === i
@@ -75,7 +75,7 @@ export const hexCoordsToLookupTable = <T>(
     }
     if (!(z in table[x][y])) {
       table[x][y][z] = !corresponding ? null : [corresponding[idx]]
-    } else if (!corresponding) {
+    } else if (corresponding) {
       table[x][y][z]!.push(corresponding![idx])
     }
   }
@@ -97,37 +97,35 @@ export const isHexCoordinateArticulationPoint = (
   coord: HexCoord,
   otherHexs: HexCoord[]
 ): Boolean => {
-  // Checks whether, if the given coordinate would be removed, the graph of hexes would be split in more, no longer connected graphs
-  // Super simple but quite inefficient: remove tested hex coordinate from all hexes, take random starting point, explore graph and check whether each other hex can be reached
-
-  // Remove duplicates
-  // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
-  const uniqueOtherHexs = new Set(otherHexs)
-  // Remove tested hex if it is present
-  uniqueOtherHexs.delete(coord)
-  // Select random starting point
-  const start = Array.from(uniqueOtherHexs.values())[0]
-  // Remove random starting point indicating it as discoverd
-  uniqueOtherHexs.delete(start)
-  const lookUp = hexCoordsToLookupTable(otherHexs)
-  // const discovered: Set<HexCoord> = new Set([ start ])
-  const queue = [start]
-
+  let uniqueCoords = uniqueCoordinates(otherHexs)
+  // Remove coordinate being tested as articulation point
+  uniqueCoords = uniqueCoords.filter(
+    (uniqueCoor) => !haveSameCubeCoordinates(uniqueCoor, coord)
+  )
+  // Select random staring point from remaining coords and remove it to mark it as discovered
+  // Just discovered coordinates are put a queue as starting of points for further exploration
+  let queue = uniqueCoords.length ? [uniqueCoords.shift()!] : []
+  // While there are still unexplored coordinates
   while (queue.length > 0) {
-    const current = queue.shift()
-    const currentNeighbors = getNeighbours(current!).filter((el) =>
-      checkOccupationInLookupTable(el, lookUp)
+    const current = queue.shift()!
+    const neighbors = getNeighbours(current)
+    const unDiscoveredNeighbors = neighbors.filter(
+      (coord) =>
+        uniqueCoords.findIndex((otherCoord) =>
+          haveSameCubeCoordinates(coord, otherCoord)
+        ) != -1
     )
-    const undiscoverdNeighbors = currentNeighbors.filter((el) =>
-      uniqueOtherHexs.has(el)
+    // Add the undiscovered neighbors to the queue
+    queue = [...queue, ...unDiscoveredNeighbors]
+    // Remove now discovered neighbors from list to mark as discovered*
+    uniqueCoords = uniqueCoords.filter(
+      (coord) =>
+        unDiscoveredNeighbors.findIndex((otherCoord) =>
+          haveSameCubeCoordinates(coord, otherCoord)
+        ) == -1
     )
-    undiscoverdNeighbors.forEach((el) => {
-      uniqueOtherHexs.delete(el)
-      queue.push(el)
-    })
   }
-
-  return uniqueOtherHexs.size > 0
+  return uniqueCoords.length > 0
 }
 
 // type HexCoordGraphNode = {
@@ -183,9 +181,12 @@ export const walkPerimeter = (
   otherHexs: HexCoord[],
   max_distance = Infinity
 ): Move[] => {
+  // FFS WTF JAVASCRIPT
+  const actualModulo = (a: number, b: number): number =>
+    a >= 0 ? a % b : b + (a % b)
   // Create lookup table
   const lookUp = hexCoordsToLookupTable<null>(otherHexs)
-  const discovered: Set<HexCoord> = new Set([startCoord])
+  const discovered: HexCoord[] = [startCoord]
   let idx = 0
   const foundMoves: Move[] = [
     {
@@ -209,7 +210,12 @@ export const walkPerimeter = (
       // A neighbor is a valid position if
       const validNeighbors = neighbors
         // A shorter or equal length path to there hasn't already been found
-        .filter((coord) => !discovered.has(coord))
+        .filter(
+          (coord) =>
+            discovered.filter((discoveredCoord) =>
+              haveSameCubeCoordinates(coord, discoveredCoord)
+            ).length == 0
+        )
         // Isn't occupied by another cell
         .filter((coord) => !checkOccupationInLookupTable(coord, lookUp))
         // Two part:
@@ -219,12 +225,13 @@ export const walkPerimeter = (
           const neighborIndex = neighbors.findIndex((neighborCoord) =>
             haveSameCubeCoordinates(neighborCoord, coord)
           )
+          console.log(actualModulo(neighborIndex - 1, 6))
           const leftNeighborOccupied = checkOccupationInLookupTable(
-            neighbors[neighborIndex - (1 % 6)],
+            neighbors[actualModulo(neighborIndex - 1, 6)],
             lookUp
           )
           const rightNeighborOccupied = checkOccupationInLookupTable(
-            neighbors[neighborIndex + (1 % 6)],
+            neighbors[actualModulo(neighborIndex + 1, 6)],
             lookUp
           )
           return (
@@ -233,6 +240,7 @@ export const walkPerimeter = (
           )
         })
       validNeighbors.forEach((valid) => {
+        discovered.push(valid)
         foundMoves.push({
           length: prevLength + 1,
           destination: valid,
@@ -287,7 +295,7 @@ export const shiftAlongAxis = (
 }
 
 export {
-  uniqueCells,
+  uniqueCoordinates,
   hasValidCubeCoordinate,
   getNeighbours,
   haveSameCubeCoordinates,
