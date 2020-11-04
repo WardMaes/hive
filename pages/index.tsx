@@ -5,8 +5,6 @@ import { gameContext } from '../context/machines'
 import Board from '../components/Board'
 import InsectSelector from '../components/InsectSelector'
 
-import { InsectName } from '../machines/game'
-
 export default function Home() {
   const [gameState] = useContext(gameContext)
 

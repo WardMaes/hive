@@ -7,9 +7,16 @@
   margin: 0;
   /* TODO: Move to javascript to make configurable (could do actual calculation but looks complex, so guesstimate ratio) */
   gap: var(--grid-gap) calc(var(--grid-gap) * 2);
+  margin: 0 auto;
+  flex-grow: 1;
+  max-width: 30rem;
 }
 
 .board-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
   padding-bottom: 200px;
 }
 
