@@ -58,7 +58,6 @@ export interface Schema {
         selecting: {}
         placing: {}
         moving: {}
-        finished: {}
       }
     }
     checkGameFinished: {}
@@ -67,101 +66,107 @@ export interface Schema {
   }
 }
 
-export const gameMachine = Machine<Context, Schema, Event>({
-  id: 'game',
-  initial: 'initializing',
-  context: {
-    // Game-specific context
-    cellsOnBoard: startCells,
-    currentPlayer: 1,
-    unplacedInsectsPlayer1: [
-      {
-        name: InsectName.queen,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.ant,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.ant,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.ant,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.beetle,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.beetle,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.spider,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.spider,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.grasshopper,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.grasshopper,
-        validCells: () => [],
-      },
-      {
-        name: InsectName.grasshopper,
-        validCells: () => [],
-      },
-    ],
-    unplacedInsectsPlayer2: [],
-    // Turn-specific context
-    selectedPiece: null,
-    cellsPossibleDestinationsCurrentMove: [],
-    // 'piecesAllowedToBeMoved' and 'piecesAllowedToBePlaced' could maybe be merged into 1 property 'piecesAllowedToBePlayed'
-    piecesAllowedToBeMoved: [],
-    piecesAllowedToBePlaced: [],
-  },
-  states: {
-    initializing: {
-      entry: assign((_) => ({
-        // Select start player (propose random, animated in UI as coin flip or something)
-        // Set initial pieces for both players
-        // unplacedInsectsPlayer1: [],
-        unplacedInsectsPlayer2: [],
-      })),
-      always: 'playing',
-    },
-    playing: {
-      ...turnMachine,
-    },
-    checkGameFinished: {
-      id: 'check',
-      // Transient transition with conditionals to check whether game is over
-      always: [
+export const gameMachine = Machine<Context, Schema, Event>(
+  {
+    id: 'game',
+    initial: 'initializing',
+    context: {
+      // Game-specific context
+      cellsOnBoard: startCells,
+      currentPlayer: 1,
+      unplacedInsectsPlayer1: [
         {
-          target: 'gameOver',
-          cond: () =>
-            false /* Conditional logic to check if queen is surrounded */,
+          name: InsectName.queen,
+          validCells: () => [],
         },
-        { target: 'alternating' },
+        {
+          name: InsectName.ant,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.ant,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.ant,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.beetle,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.beetle,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.spider,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.spider,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.grasshopper,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.grasshopper,
+          validCells: () => [],
+        },
+        {
+          name: InsectName.grasshopper,
+          validCells: () => [],
+        },
       ],
+      unplacedInsectsPlayer2: [],
+      // Turn-specific context
+      selectedPiece: null,
+      cellsPossibleDestinationsCurrentMove: [],
+      // 'piecesAllowedToBeMoved' and 'piecesAllowedToBePlaced' could maybe be merged into 1 property 'piecesAllowedToBePlayed'
+      piecesAllowedToBeMoved: [],
+      piecesAllowedToBePlaced: [],
     },
-    alternating: {
-      // Transient state that simply changes player turn
-      always: {
-        actions: assign({
-          currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
-        }),
-        target: 'playing',
+    states: {
+      initializing: {
+        entry: assign((_) => ({
+          // Select start player (propose random, animated in UI as coin flip or something)
+          // Set initial pieces for both players
+          // unplacedInsectsPlayer1: [],
+          unplacedInsectsPlayer2: [],
+        })),
+        always: 'playing',
       },
+      playing: {
+        ...turnMachine,
+      },
+      checkGameFinished: {
+        id: 'check',
+        // Transient transition with conditionals to check whether game is over
+        always: [
+          {
+            target: 'gameOver',
+            cond: 'queenSurrounded',
+          },
+          { target: 'alternating' },
+        ],
+      },
+      alternating: {
+        // Transient state that simply changes player turn
+        always: {
+          actions: assign({
+            currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
+          }),
+          target: 'playing',
+        },
+      },
+      gameOver: {},
     },
-    gameOver: {},
   },
-})
+  {
+    guards: {
+      queenSurrounded: () => false, // TODO
+    },
+  }
+)
