@@ -1,6 +1,7 @@
-import { assign } from 'xstate'
+import { assign, actions } from 'xstate'
+const { raise } = actions
 import { haveSameCubeCoordinates } from '../lib/hex'
-import { Insect, Cell } from './game'
+import { Insect, Cell, Context } from './game'
 
 export interface TurnContext {
   selectedPiece: Cell | null
@@ -16,7 +17,6 @@ export interface TurnStateSchema {
     selecting: {}
     placing: {}
     moving: {}
-    finished: {}
   }
 }
 
@@ -52,7 +52,7 @@ export const turnMachine: TurnStateSchema = {
         // That or listener that links to function that sets the context
         PLACE: {
           target: 'placing',
-          cond: (context) => context.selectedPiece,
+          cond: (context: TurnContext) => context.selectedPiece,
         },
         MOVE: { target: 'moving' },
         // Player selects a different piece
@@ -83,13 +83,10 @@ export const turnMachine: TurnStateSchema = {
       // Animation to be played in frontend while in this state
       entry: assign({
         cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
-        cellsOnBoard: (context, event) => {
-          console.log('cellsOnBoard', event)
-          console.log('context.selectedPiece', context)
+        cellsOnBoard: (context: Context, event) => {
           const cellIndexToUpdate = context.cellsOnBoard.findIndex((cell) =>
             haveSameCubeCoordinates(cell.coord, context.selectedPiece.coord)
           )
-          console.log('cellIndexToUpdate', cellIndexToUpdate)
           const copy = context.cellsOnBoard
           copy[cellIndexToUpdate].insects.push(event.insect)
           return copy
@@ -97,7 +94,7 @@ export const turnMachine: TurnStateSchema = {
       }),
       after: {
         // After a 1s animation, go to finished state
-        1000: 'finished',
+        500: '#check',
       },
     },
     moving: {
@@ -107,12 +104,8 @@ export const turnMachine: TurnStateSchema = {
       }),
       after: {
         // After a 1s animation, go to finished state
-        1000: 'finished',
+        500: '#check',
       },
-    },
-    finished: {
-      // Transitive state to finish turn and to return to game machine
-      type: 'final', // This will notify parent machine the current turn is over
     },
   },
 }

@@ -29,7 +29,11 @@ const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
         onClick={() => sendToGame(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
       >
         <div className="cell_clip">
-          {cell.insects.length ? JSON.stringify(cell.insects, null, 2) : ''}
+          <div className="insect">
+            {cell.insects.length
+              ? cell.insects.map((insect) => insect.name).join(', ')
+              : ''}
+          </div>
         </div>
       </div>
     </div>

@@ -47,7 +47,7 @@ export interface GameContext {
   unplacedInsectsPlayer2: Insect[]
 }
 
-export type GameEvent = { type: '' }
+export type GameEvent = { type: 'TURN.OVER' }
 
 export interface Schema {
   states: {
@@ -140,16 +140,15 @@ export const gameMachine = Machine<Context, Schema, Event>({
     },
     playing: {
       ...turnMachine,
-      onDone: {
-        target: 'checkGameFinished',
-      },
     },
     checkGameFinished: {
+      id: 'check',
       // Transient transition with conditionals to check whether game is over
       always: [
         {
           target: 'gameOver',
-          cond: false /* Conditional logic to check if queen is surrounded */,
+          cond: () =>
+            false /* Conditional logic to check if queen is surrounded */,
         },
         { target: 'alternating' },
       ],
