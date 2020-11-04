@@ -55,6 +55,14 @@
   width: 100%;
   background-color: lightgray;
   text-align: center; /* For debugging purposes */
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
+
+.cell_clip .insect {
+  border: 0;
 }
 
 .cell-z {
