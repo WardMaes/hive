@@ -134,43 +134,43 @@ export const isHexCoordinateArticulationPoint = (
 // }
 
 // TODO implement more efficient connected modules in graph algorithm to find all articulation points
-const getArticulationPointsHexCoordinates = (hexCoords: HexCoord[]) => {
-  // Remove duplicates
-  // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
-  const uniqueOtherHexs = new Set(hexCoords)
-  // Is graph algorithm so convert graph (easier to work with and avoids converting all the time)
+// const getArticulationPointsHexCoordinates = (hexCoords: HexCoord[]) => {
+//   // Remove duplicates
+//   // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
+//   const uniqueOtherHexs = new Set(hexCoords)
+//   // Is graph algorithm so convert graph (easier to work with and avoids converting all the time)
 
-  const startHexCoord = hexCoords[0]
+//   const startHexCoord = hexCoords[0]
 
-  const discovered: Set<HexCoord> = new Set()
-  const preOrderFoundCounterLookup = new Map<HexCoord, number>()
-  const lowestDiscIndexReachableMap = new Map<HexCoord, number>()
+//   const discovered: Set<HexCoord> = new Set()
+//   const preOrderFoundCounterLookup = new Map<HexCoord, number>()
+//   const lowestDiscIndexReachableMap = new Map<HexCoord, number>()
 
-  getArticulationPointsHexCoordinatesRecHelper(
-    startHexCoord,
-    null,
-    discovered,
-    preOrderFoundCounterLookup,
-    lowestDiscIndexReachableMap
-  )
-}
+//   getArticulationPointsHexCoordinatesRecHelper(
+//     startHexCoord,
+//     null,
+//     discovered,
+//     preOrderFoundCounterLookup,
+//     lowestDiscIndexReachableMap
+//   )
+// }
 
-const getArticulationPointsHexCoordinatesRecHelper = (
-  coord: HexCoord,
-  parent: HexCoord | null,
-  discovered: Set<HexCoord>,
-  preOrderFoundCounterLookup: Map<HexCoord, number>,
-  lowestDiscIndexReachableMap: Map<HexCoord, number>
-) => {
-  discovered.add(coord)
-  // Will save number which indicates when iteration it was discovered
-  const preOrderIndex = preOrderFoundCounterLookup.size
-  preOrderFoundCounterLookup.set(coord, preOrderIndex)
-  // Initially, the furthest reachable node is set as itself
-  lowestDiscIndexReachableMap.set(coord, preOrderIndex)
+// const getArticulationPointsHexCoordinatesRecHelper = (
+//   coord: HexCoord,
+//   parent: HexCoord | null,
+//   discovered: Set<HexCoord>,
+//   preOrderFoundCounterLookup: Map<HexCoord, number>,
+//   lowestDiscIndexReachableMap: Map<HexCoord, number>
+// ) => {
+//   discovered.add(coord)
+//   // Will save number which indicates when iteration it was discovered
+//   const preOrderIndex = preOrderFoundCounterLookup.size
+//   preOrderFoundCounterLookup.set(coord, preOrderIndex)
+//   // Initially, the furthest reachable node is set as itself
+//   lowestDiscIndexReachableMap.set(coord, preOrderIndex)
 
-  getNeighbours(coord).filter((el) => checkOccupationInLookupTable(el, lo))
-}
+//   getNeighbours(coord).filter((el) => checkOccupationInLookupTable(el, lo))
+// }
 
 /* 
   Perimeter walking
