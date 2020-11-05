@@ -8,6 +8,7 @@ import {
   checkOccupationInLookupTable,
   isHexCoordinateArticulationPoint,
   walkPerimeter,
+  getArticulationPointsHexCoordinates,
 } from '../hex'
 
 describe('Hex coordinate logic', () => {
@@ -176,4 +177,8 @@ it('detects as non articulation point', () => {
 
 // it('finds the entire perimeter', () => {
 //   expect(walkPerimeter({ x: 1, y: -1, z: 0 }, occupiedCells)).toEqual(true)
+// })
+
+// it('finds articulation points', () => {
+//   console.log(getArticulationPointsHexCoordinates(occupiedCells))
 // })

@@ -15,7 +15,7 @@ const hasValidCubeCoordinate = (hexCoord: HexCoord): Boolean => {
 }
 
 // Returns the neighbors in clockwise order
-const getNeighbours = (hexCoord: HexCoord): HexCoord[] => {
+export const getNeighbours = (hexCoord: HexCoord): HexCoord[] => {
   return [
     // Note that these directions only apply in flat configuration
     { x: hexCoord.x, y: hexCoord.y + 1, z: hexCoord.z - 1 }, // Top
@@ -54,7 +54,7 @@ const filterOverlap = (
   Lookup table
 */
 
-type HexLookupTable<T> = {
+type HexLookupTable<T = null> = {
   [x: number]: { [y: number]: { [z: number]: T[] | null } }
 }
 
@@ -128,49 +128,109 @@ export const isHexCoordinateArticulationPoint = (
   return uniqueCoords.length > 0
 }
 
-// type HexCoordGraphNode = {
-//   value: HexCoord,
-//   neighbors: HexCoord[]
-// }
-
 // TODO implement more efficient connected modules in graph algorithm to find all articulation points
-// const getArticulationPointsHexCoordinates = (hexCoords: HexCoord[]) => {
-//   // Remove duplicates
-//   // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
-//   const uniqueOtherHexs = new Set(hexCoords)
-//   // Is graph algorithm so convert graph (easier to work with and avoids converting all the time)
+export const getArticulationPointsHexCoordinates = (
+  hexCoords: HexCoord[]
+): HexCoord[] => {
+  // Remove duplicates
+  // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
+  const startHexCoord = hexCoords[0]
+  const occupationLookup = hexCoordsToLookupTable<null>(hexCoords)
+  const discovered: HexCoord[] = []
+  const foundOrder: HexCoord[] = []
+  const foundOrderToEarliestReachableMap = new Map<number, number>()
+  const articulationPoints: HexCoord[] = []
 
-//   const startHexCoord = hexCoords[0]
+  getArticulationPointsHexCoordinatesRecHelper(
+    startHexCoord,
+    null,
+    occupationLookup,
+    discovered,
+    foundOrder,
+    foundOrderToEarliestReachableMap,
+    articulationPoints
+  )
 
-//   const discovered: Set<HexCoord> = new Set()
-//   const preOrderFoundCounterLookup = new Map<HexCoord, number>()
-//   const lowestDiscIndexReachableMap = new Map<HexCoord, number>()
+  return uniqueCoordinates(articulationPoints)
+}
 
-//   getArticulationPointsHexCoordinatesRecHelper(
-//     startHexCoord,
-//     null,
-//     discovered,
-//     preOrderFoundCounterLookup,
-//     lowestDiscIndexReachableMap
-//   )
-// }
+// Tarjan algorithm
+const getArticulationPointsHexCoordinatesRecHelper = (
+  coord: HexCoord,
+  parent: HexCoord | null,
+  lookUp: HexLookupTable,
+  discovered: HexCoord[],
+  foundOrder: HexCoord[],
+  foundOrderToEarliestReachableMap: Map<number, number>,
+  articulationPoints: HexCoord[]
+) => {
+  discovered.push(coord)
+  foundOrder.push(coord)
+  const coordDiscIdx = foundOrder.length - 1
+  foundOrderToEarliestReachableMap.set(coordDiscIdx, coordDiscIdx)
 
-// const getArticulationPointsHexCoordinatesRecHelper = (
-//   coord: HexCoord,
-//   parent: HexCoord | null,
-//   discovered: Set<HexCoord>,
-//   preOrderFoundCounterLookup: Map<HexCoord, number>,
-//   lowestDiscIndexReachableMap: Map<HexCoord, number>
-// ) => {
-//   discovered.add(coord)
-//   // Will save number which indicates when iteration it was discovered
-//   const preOrderIndex = preOrderFoundCounterLookup.size
-//   preOrderFoundCounterLookup.set(coord, preOrderIndex)
-//   // Initially, the furthest reachable node is set as itself
-//   lowestDiscIndexReachableMap.set(coord, preOrderIndex)
-
-//   getNeighbours(coord).filter((el) => checkOccupationInLookupTable(el, lo))
-// }
+  // Get next neighbors to descend to
+  let directNeighbors = getNeighbours(coord).filter((coord) =>
+    checkOccupationInLookupTable(coord, lookUp)
+  )
+  // If root node, then dont try to filter parent
+  if (parent) {
+    // Skip parent
+    directNeighbors = directNeighbors.filter(
+      (coord) => !haveSameCubeCoordinates(coord, parent)
+    )
+  }
+  let independantRootNeighbors = 0
+  directNeighbors.forEach((neighCoord) => {
+    // Check if it has already been discovered
+    const neighborDiscIdx = discovered.findIndex((discCoord) =>
+      haveSameCubeCoordinates(neighCoord, discCoord)
+    )
+    if (neighborDiscIdx == -1) {
+      independantRootNeighbors++
+      // Will be the discovery index of next discovered element
+      const nextDiscIdx = foundOrder.length
+      getArticulationPointsHexCoordinatesRecHelper(
+        neighCoord,
+        coord,
+        lookUp,
+        discovered,
+        foundOrder,
+        foundOrderToEarliestReachableMap,
+        articulationPoints
+      )
+      if (
+        foundOrderToEarliestReachableMap.get(nextDiscIdx)! <
+        foundOrderToEarliestReachableMap.get(coordDiscIdx)!
+      ) {
+        // new lowest reachable
+        foundOrderToEarliestReachableMap.set(
+          coordDiscIdx,
+          foundOrderToEarliestReachableMap.get(nextDiscIdx)!
+        )
+      } else if (
+        foundOrderToEarliestReachableMap.get(nextDiscIdx)! >= coordDiscIdx
+      ) {
+        // Handle special case if root
+        if (parent === null) {
+          if (independantRootNeighbors > 1) {
+            articulationPoints.push(coord)
+          }
+        } else {
+          // Current element is articulation point for at least this neighbor
+          articulationPoints.push(coord)
+        }
+      }
+    } else {
+      // If is has already been discovered
+      if (
+        neighborDiscIdx < foundOrderToEarliestReachableMap.get(coordDiscIdx)!
+      ) {
+        foundOrderToEarliestReachableMap.set(coordDiscIdx, neighborDiscIdx)
+      }
+    }
+  })
+}
 
 /* 
   Perimeter walking
@@ -297,7 +357,6 @@ export const shiftAlongAxis = (
 export {
   uniqueCoordinates,
   hasValidCubeCoordinate,
-  getNeighbours,
   haveSameCubeCoordinates,
   filterOverlap,
 }
