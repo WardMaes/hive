@@ -53,7 +53,7 @@
   top: 0;
   height: 100%;
   width: 100%;
-  background-color: lightgray;
+  background-color: #edf2f7;
   text-align: center; /* For debugging purposes */
   display: flex;
   justify-content: center;
@@ -74,7 +74,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #ddd;
+  background-color: #cbd5e0;
   padding: 1rem;
 }
 
@@ -84,4 +84,14 @@
   border: 1px solid darkgray;
   padding: 1rem;
   margin: 0.1rem;
+}
+
+.insect-wrap:hover {
+  filter: drop-shadow(0px 0px 4px rgba(50, 50, 0, 0.5));
+}
+
+.insect-wrap > .insect {
+  clip-path: polygon(75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%, 25% 0);
+  background-color: #edf2f7;
+  border: 0;
 }
