@@ -1,4 +1,4 @@
-import { Cell } from '../../lib/game'
+import { Cell, Piece } from '../../lib/game'
 import { Insect } from '../../lib/insect'
 import { HexCoord, Move } from '../../lib/hex'
 
@@ -21,8 +21,10 @@ export interface TurnContext {
 */
 
 export type TurnEvent =
-  | { type: 'MOVE'; move: Move }
-  | { type: 'MOVESELECT'; cell: Cell }
-  | { type: 'PLACE'; coord: HexCoord }
-  | { type: 'PLACESELECT'; insect: Insect }
-  | { type: 'UNSELECT' }
+  // | { type: 'MOVE'; move: Move }
+  | { type: 'CELL.CLICK'; cell: Cell }
+  | { type: 'UNPLAYEDPIECE.CLICK'; piece: Piece }
+// | { type: 'MOVESELECT'; cell: Cell }
+// | { type: 'PLACE'; coord: HexCoord }
+// | { type: 'PLACESELECT'; insect: Insect }
+// | { type: 'UNSELECT' }
