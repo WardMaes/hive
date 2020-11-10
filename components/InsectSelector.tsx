@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { useContext } from 'react'
 
 import { Insect, InsectName } from '../lib/insect'
@@ -27,7 +28,13 @@ const InsectSelector = ({ insects }: InsectSelectorProps) => {
             sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
           }}
         >
-          {JSON.stringify(insectName, null, 2)}
+          <Image
+            src={`/icons/${insectName.toLowerCase()}.svg`}
+            width="50"
+            height="50"
+            alt={`${insectName}`}
+            priority
+          ></Image>
         </div>
       ))}
     </div>

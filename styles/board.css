@@ -70,11 +70,10 @@
 }
 
 .insect-selector {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 200px;
   background-color: #ddd;
   padding: 1rem;
 }
@@ -84,4 +83,5 @@
   display: block;
   border: 1px solid darkgray;
   padding: 1rem;
+  margin: 0.1rem;
 }
