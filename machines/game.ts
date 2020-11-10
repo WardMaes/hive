@@ -1,26 +1,14 @@
 import { Machine, assign } from 'xstate'
-import { Game, Cell, Board, Piece } from '../lib/game'
+import { Game } from '../lib/game'
 
 import { Context, Event } from './types'
 import { turnMachine, TurnStateSchema } from './turn'
-
-const startCells: Cell[] = [
-  { coord: { x: 1, y: 1, z: -2 }, pieces: [] },
-  { coord: { x: 2, y: -1, z: -1 }, pieces: [] },
-  { coord: { x: 1, y: 2, z: -3 }, pieces: [] },
-  { coord: { x: 0, y: 3, z: -3 }, pieces: [] },
-  { coord: { x: 0, y: 0, z: 0 }, pieces: [] }, // center
-  { coord: { x: -1, y: 1, z: 0 }, pieces: [] }, // top left
-  { coord: { x: 0, y: 1, z: -1 }, pieces: [] }, // top center
-  { coord: { x: 1, y: 0, z: -1 }, pieces: [] }, // top right
-  { coord: { x: -1, y: 0, z: 1 }, pieces: [] }, // bottom left
-  { coord: { x: 0, y: -1, z: 1 }, pieces: [] }, // bottom center
-  { coord: { x: 1, y: -1, z: 0 }, pieces: [] }, // bottom right
-]
+import { createRoom, joinRoom } from '../lib/p2p'
 
 export interface Schema {
   states: {
     initializing: {}
+    menu: {}
     playing: TurnStateSchema
     checkGameFinished: {}
     alternating: {}
@@ -55,6 +43,18 @@ export const gameMachine = Machine<Context, Schema, Event>(
           'updateUnplacedInsects',
         ],
         always: 'playing',
+      },
+      menu: {
+        on: {
+          'GAME.JOIN': {
+            target: 'playing', // TODO: go to /rooms/[roomId]
+            actions: ['joinRoom'],
+          },
+          'GAME.CREATE': {
+            target: 'playing', // TODO: go to /rooms/[roomId]
+            actions: ['createRoom'],
+          },
+        },
       },
       playing: {
         ...turnMachine,
@@ -117,6 +117,17 @@ export const gameMachine = Machine<Context, Schema, Event>(
         validPlacementCoords: (context) =>
           context.game!.getValidPlacementCoordinates(context.currentPlayer),
       }),
+      createRoom: (context, event) => {
+        // console.log('actions.createRoom', context, event)
+        // create new room, with user as host
+        createRoom()
+      },
+      joinRoom: (context, event) => {
+        // console.log('actions.createRoom', context, event)
+        // create new room, with user as host
+        // @ts-ignore
+        joinRoom(event.code || 'abc')
+      },
     },
     guards: {
       isGameOver: (context) => {
