@@ -2,9 +2,9 @@ import Peer from 'simple-peerjs'
 
 export async function createRoom() {
   const peer = new Peer({
-    host: 'localhost',
-    port: 9000,
-    path: '/myapp',
+    host: 'peer-connection.herokuapp.com',
+    port: 80,
+    path: '/peerjs/hive',
     initiator: true,
   })
 
@@ -23,9 +23,9 @@ export async function createRoom() {
 export async function joinRoom(roomId: string) {
   console.log('joining room', roomId)
   const peer = new Peer({
-    host: 'localhost',
-    port: 9000,
-    path: '/myapp',
+    host: 'peer-connection.herokuapp.com',
+    port: 80,
+    path: '/peerjs/hive',
     initiator: false,
   })
 
