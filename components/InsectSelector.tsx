@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 
-import { Insect } from '../machines/game'
+import { Insect } from '../lib/insect'
 import { gameContext } from '../context/machines'
 
 type InsectSelectorProps = {
@@ -8,7 +8,7 @@ type InsectSelectorProps = {
 }
 
 const InsectSelector = ({ insects }: InsectSelectorProps) => {
-  const [_, sendToGame] = useContext(gameContext)
+  const [test, sendToGame] = useContext(gameContext)
 
   return (
     <div className="flex flex-row justify-center content-center h-full flex-wrap">
@@ -16,7 +16,10 @@ const InsectSelector = ({ insects }: InsectSelectorProps) => {
         <div
           className="insect"
           key={i + 1}
-          onClick={() => sendToGame('PLACE', { insect })}
+          onClick={() => {
+            console.log(test)
+            sendToGame('PLACESELECT', { insect })
+          }}
         >
           {JSON.stringify(insect, null, 2)}
         </div>

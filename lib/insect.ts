@@ -1,4 +1,4 @@
-import { Cell } from '../machines/game'
+import { REPL_MODE_STRICT } from 'repl'
 import {
   Move,
   walkPerimeter,
@@ -10,13 +10,29 @@ import {
   getNeighbours,
   haveSameCubeCoordinates,
 } from '../lib/hex'
+import { Cell } from './game'
 
 export enum InsectName {
-  'ant',
-  'beetle',
-  'queen',
-  'grasshopper',
-  'spider',
+  'ant' = 'Ant',
+  'beetle' = 'Beetle',
+  'queen' = 'Queen Bee',
+  'grasshopper' = 'Grasshopper',
+  'spider' = 'Spider',
+}
+
+export const getInsectByName = (name: InsectName): Insect => {
+  switch (name) {
+    case InsectName.ant:
+      return Ant
+    case InsectName.beetle:
+      return Beetle
+    case InsectName.grasshopper:
+      return Grasshopper
+    case InsectName.queen:
+      return Queen
+    default:
+      return Spider
+  }
 }
 
 export type Insect = {
@@ -120,7 +136,7 @@ export const Beetle: Insect = {
     } else {
       // Logic for moving on top of hive
       const occupiedCoordinatesLevelBelow = boardCells
-        .filter(({ insects }) => insects.length == level - 1)
+        .filter(({ pieces }) => pieces.length == level - 1)
         .map((cell) => cell.coord)
       const lookUp = hexCoordsToLookupTable<null>(occupiedCoordinatesLevelBelow)
       // TODO extract to lib/hex and allow for any distance (will be handy for mosquito)
@@ -140,7 +156,7 @@ export const Beetle: Insect = {
     // Logic for either jumping or diving on a neighbor
     const heightLookUp = hexCoordsToLookupTable<number>(
       boardCells.map(({ coord }) => coord),
-      boardCells.map(({ insects }) => insects.length)
+      boardCells.map(({ pieces }) => pieces.length)
     )
     const neighborsWithHeightDifferenceOfOne = getNeighbours(coord).filter(
       ({ x, y, z }) =>

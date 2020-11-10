@@ -1,65 +1,27 @@
 import { Machine, assign } from 'xstate'
+import { Game, Cell, Board, Piece } from '../lib/game'
 
-import { HexCoord } from '../lib/hex'
-import { Insect } from '../lib/insect'
-import { turnMachine, TurnContext, TurnEvent } from './turn'
+import { Context, Event } from './types'
+import { turnMachine, TurnStateSchema } from './turn'
 
 const startCells: Cell[] = [
-  { coord: { x: 1, y: 1, z: -2 }, insects: [] },
-  { coord: { x: 2, y: -1, z: -1 }, insects: [] },
-  { coord: { x: 1, y: 2, z: -3 }, insects: [] },
-  { coord: { x: 0, y: 3, z: -3 }, insects: [] },
-  { coord: { x: 0, y: 0, z: 0 }, insects: [] }, // center
-  { coord: { x: -1, y: 1, z: 0 }, insects: [] }, // top left
-  { coord: { x: 0, y: 1, z: -1 }, insects: [] }, // top center
-  { coord: { x: 1, y: 0, z: -1 }, insects: [] }, // top right
-  { coord: { x: -1, y: 0, z: 1 }, insects: [] }, // bottom left
-  { coord: { x: 0, y: -1, z: 1 }, insects: [] }, // bottom center
-  { coord: { x: 1, y: -1, z: 0 }, insects: [] }, // bottom right
+  { coord: { x: 1, y: 1, z: -2 }, pieces: [] },
+  { coord: { x: 2, y: -1, z: -1 }, pieces: [] },
+  { coord: { x: 1, y: 2, z: -3 }, pieces: [] },
+  { coord: { x: 0, y: 3, z: -3 }, pieces: [] },
+  { coord: { x: 0, y: 0, z: 0 }, pieces: [] }, // center
+  { coord: { x: -1, y: 1, z: 0 }, pieces: [] }, // top left
+  { coord: { x: 0, y: 1, z: -1 }, pieces: [] }, // top center
+  { coord: { x: 1, y: 0, z: -1 }, pieces: [] }, // top right
+  { coord: { x: -1, y: 0, z: 1 }, pieces: [] }, // bottom left
+  { coord: { x: 0, y: -1, z: 1 }, pieces: [] }, // bottom center
+  { coord: { x: 1, y: -1, z: 0 }, pieces: [] }, // bottom right
 ]
-
-export enum InsectName {
-  'ant' = 'Ant',
-  'beetle' = 'Beetle',
-  'queen' = 'Queen Bee',
-  'grasshopper' = 'Grasshopper',
-  'spider' = 'Spider',
-}
-
-export type Board = {
-  cells: Cell[]
-}
-
-export type Cell = {
-  coord: HexCoord
-  insects: Insect[]
-}
-
-export type Context = GameContext & TurnContext
-
-export type Event = GameEvent | TurnEvent
-
-export interface GameContext {
-  // Game-specific context
-  cellsOnBoard: Cell[]
-  currentPlayer: number
-  unplacedInsectsPlayer1: Insect[]
-  unplacedInsectsPlayer2: Insect[]
-}
-
-export type GameEvent = { type: 'TURN.OVER' }
 
 export interface Schema {
   states: {
     initializing: {}
-    playing: {
-      states: {
-        initializing: {}
-        selecting: {}
-        placing: {}
-        moving: {}
-      }
-    }
+    playing: TurnStateSchema
     checkGameFinished: {}
     alternating: {}
     gameOver: {}
@@ -72,70 +34,26 @@ export const gameMachine = Machine<Context, Schema, Event>(
     initial: 'initializing',
     context: {
       // Game-specific context
-      cellsOnBoard: startCells,
+      cellsOnBoard: [], //startCells,
       currentPlayer: 1,
-      unplacedInsectsPlayer1: [
-        {
-          name: InsectName.queen,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.ant,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.ant,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.ant,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.beetle,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.beetle,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.spider,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.spider,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.grasshopper,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.grasshopper,
-          validCells: () => [],
-        },
-        {
-          name: InsectName.grasshopper,
-          validCells: () => [],
-        },
-      ],
-      unplacedInsectsPlayer2: [],
+      turn: 1,
       // Turn-specific context
-      selectedPiece: null,
-      cellsPossibleDestinationsCurrentMove: [],
+      // selectedPiece: undefined,
+      // cellsPossibleDestinationsCurrentMove: [],
       // 'piecesAllowedToBeMoved' and 'piecesAllowedToBePlaced' could maybe be merged into 1 property 'piecesAllowedToBePlayed'
-      piecesAllowedToBeMoved: [],
-      piecesAllowedToBePlaced: [],
+      // cellsAllowedToMove: [],
+      // insectsAllowedToPlace: [],
     },
     states: {
       initializing: {
-        entry: assign((_) => ({
-          // Select start player (propose random, animated in UI as coin flip or something)
-          // Set initial pieces for both players
-          // unplacedInsectsPlayer1: [],
-          unplacedInsectsPlayer2: [],
-        })),
+        entry: [
+          assign<Context, Event>({
+            // Select start player (propose random, animated in UI as coin flip or something)
+            // Intitialze game object which is a facade for all game logic
+            game: () => new Game({ expansions: [] }),
+          }),
+          'updateUnplacedInsects',
+        ],
         always: 'playing',
       },
       playing: {
@@ -147,7 +65,7 @@ export const gameMachine = Machine<Context, Schema, Event>(
         always: [
           {
             target: 'gameOver',
-            cond: 'queenSurrounded',
+            cond: 'isGameOver',
           },
           { target: 'alternating' },
         ],
@@ -155,9 +73,18 @@ export const gameMachine = Machine<Context, Schema, Event>(
       alternating: {
         // Transient state that simply changes player turn
         always: {
-          actions: assign({
-            currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
-          }),
+          actions: [
+            assign({
+              currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
+            }),
+            assign({
+              // Increment turn if changed from player 2 to player 1
+              turn: (context) =>
+                context.currentPlayer === 1
+                  ? context.turn + 1
+                  : context.turn + 1,
+            }),
+          ],
           target: 'playing',
         },
       },
@@ -165,8 +92,36 @@ export const gameMachine = Machine<Context, Schema, Event>(
     },
   },
   {
+    actions: {
+      updateBoardCells: assign({
+        cellsOnBoard: (context, event) => context.game!.boardCells,
+      }),
+      updateUnplacedInsects: assign({
+        unplacedInsectsPlayer1: (context) =>
+          context.game!.getUnplayedInsectsPlayer(1),
+        unplacedInsectsPlayer2: (context) =>
+          context.game!.getUnplayedInsectsPlayer(2),
+      }),
+      setCellsAllowedToMove: assign({
+        // cellsAllowedToMove: (context) => context.game.
+        cellsAllowedToMove: (context) => [],
+      }),
+      setInsectsAllowedToPlace: assign({
+        insectsAllowedToPlace: (context) =>
+          context.game!.getValidInsectsToPlace(
+            context.currentPlayer,
+            context.turn
+          ),
+      }),
+      setValidPlacementCoords: assign({
+        validPlacementCoords: (context) =>
+          context.game!.getValidPlacementCoordinates(context.currentPlayer),
+      }),
+    },
     guards: {
-      queenSurrounded: () => false, // TODO
+      isGameOver: (context) => {
+        return context.game!.isGameOver()
+      },
     },
   }
 )

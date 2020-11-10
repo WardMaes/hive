@@ -4,7 +4,7 @@ import { gameContext } from '../context/machines'
 
 import { haveSameCubeCoordinates } from '../lib/hex'
 
-import { Cell as CellType } from '../machines/game'
+import { Cell as CellType } from '../lib/game'
 
 type CellProps = {
   cell: CellType
@@ -30,8 +30,8 @@ const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
       >
         <div className="cell_clip">
           <div className="insect">
-            {cell.insects.length
-              ? cell.insects.map((insect) => insect.name).join(', ')
+            {cell.pieces.length
+              ? cell.pieces.map((piece) => piece.insect.name).join(', ')
               : ''}
           </div>
         </div>

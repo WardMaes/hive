@@ -1,97 +1,77 @@
-import { assign, actions } from 'xstate'
-const { raise } = actions
-import { haveSameCubeCoordinates } from '../lib/hex'
-import { Insect, Cell, Context } from './game'
-
-export interface TurnContext {
-  selectedPiece: Cell | null
-  cellsPossibleDestinationsCurrentMove: Cell[]
-  piecesAllowedToBeMoved: Cell[]
-  piecesAllowedToBePlaced: Insect[]
-}
+import { assign, Actions, MachineConfig } from 'xstate'
+// const { raise } = actions
+import { haveSameCubeCoordinates, HexCoord } from '../lib/hex'
+import { Insect } from '../lib/insect'
+import { Schema } from './game'
+import { Context, Event } from './types'
 
 export interface TurnStateSchema {
-  initial: 'initializing'
+  initial: 'selecting'
   states: {
-    initializing: {}
     selecting: {}
+    prepareToPlace: {}
     placing: {}
     moving: {}
   }
 }
 
-export type TurnEvent =
-  | { type: 'SELECT'; cell: Cell }
-  | { type: 'PLACE'; insect: Insect }
-  | { type: 'MOVE' }
-  | { type: 'UNSELECT' }
-
 export const turnMachine: TurnStateSchema = {
-  initial: 'initializing',
+  initial: 'selecting',
   states: {
-    initializing: {
-      entry: assign({
-        // Also includes logic which pieces are allowed to be selected
-        // - Won't break the hive
-        // - If it is the n-th (don't remember) move and the queen hasn't been placed
-        piecesAllowedToBeMoved: (_) => [], // Logic which pieces are allowed to be moved
-        piecesAllowedToBePlaced: (_) => [], // Logic which pieces are allowed to be placed
-      }),
-      always: 'selecting',
-    },
     selecting: {
-      // Selecting either an already placed piece to move or a unplayed piece to place
-      entry: assign({
-        cellsPossibleDestinationsCurrentMove: (_) => {
-          // Calculate which cells the player can click to place the selectedPiece
-          return []
-        },
-      }),
+      // Set which pieces can be moved and which insects can be placed so user can select one
+      entry: ['setCellsAllowedToMove', 'setInsectsAllowedToPlace'],
       on: {
-        // Dont know if it is possible to add identifier selected piece to the event but that would be the goal
-        // That or listener that links to function that sets the context
-        PLACE: {
-          target: 'placing',
-          cond: (context: TurnContext) => context.selectedPiece,
-        },
+        PLACESELECT: { target: 'prepareToPlace' },
         MOVE: { target: 'moving' },
-        // Player selects a different piece
-        SELECT: {
-          actions: assign({
-            selectedPiece: (_, event: { type: 'SELECT'; cell: Cell }) =>
-              event.cell,
-            cellsPossibleDestinationsCurrentMove: (_) => {
-              // Calculate which cells the player can click to place the selectedPiece
-              return []
-            },
-          }),
-        },
+      },
+    },
+    prepareToPlace: {
+      entry: [
+        assign<Context, Event>({
+          selectedToPlace: (context: Context, event: Event) => event.insect,
+          validPlacementCoords: (context: Context, event: Event) =>
+            context.game!.getValidPlacementCoordinates(context.currentPlayer),
+        }),
+      ],
+      on: {
         UNSELECT: {
-          actions: assign({
-            // Reset stuff
-            selectedPiece: (_) => null,
-            cellsPossibleDestinationsCurrentMove: (_) => {
-              // Calculate which cells the player can click to place the selectedPiece
-              return []
-            },
-          }),
+          target: 'selecting',
+        },
+        PLACESELECT: {
+          target: '',
         },
       },
     },
     // 'placing' and 'moving' states might possibly be merged into 1 state called 'playing'
     placing: {
-      // Animation to be played in frontend while in this state
-      entry: assign({
-        cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
-        cellsOnBoard: (context: Context, event) => {
-          const cellIndexToUpdate = context.cellsOnBoard.findIndex((cell) =>
-            haveSameCubeCoordinates(cell.coord, context.selectedPiece.coord)
+      entry: [
+        assign<Context, Event>({
+          placementCoord: (context: Context, event: Event) => event.coord,
+        }),
+      ],
+      actions: [
+        (context: Context, event: Event) => {
+          context.game!.placeInsect(
+            context.selectedToPlace!,
+            context.placementCoord!,
+            context.currentPlayer
           )
-          const copy = context.cellsOnBoard
-          copy[cellIndexToUpdate].insects.push(event.insect)
-          return copy
         },
-      }),
+        'updateBoardCells',
+      ],
+      // Animation to be played in frontend while in this state
+      // entry: assign({
+      //   cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
+      //   cellsOnBoard: (context: Context, event) => {
+      //     const cellIndexToUpdate = context.cellsOnBoard.findIndex((cell) =>
+      //       haveSameCubeCoordinates(cell.coord, context.selectedPiece.coord)
+      //     )
+      //     const copy = context.cellsOnBoard
+      //     copy[cellIndexToUpdate].pieces.push(event.)
+      //     return copy
+      //   },
+      // }),
       after: {
         // After a 1s animation, go to finished state
         500: '#check',
@@ -109,3 +89,7 @@ export const turnMachine: TurnStateSchema = {
     },
   },
 }
+
+// const actions = {
+//   resetTurnContext: (context, event) => true,
+// }

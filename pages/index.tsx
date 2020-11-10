@@ -18,11 +18,11 @@ export default function Home() {
       <main>
         <div className="game" style={{ width: '100%' }}>
           <div className="board-wrapper">
-            <Board cells={gameState.context.cellsOnBoard} />
+            <Board />
           </div>
           <div className="insect-selector">
             <InsectSelector
-              insects={gameState.context.unplacedInsectsPlayer1}
+              insects={gameState.context.unplacedInsectsPlayer1!}
             />
           </div>
         </div>
