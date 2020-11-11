@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Image from 'next/image'
 import { useContext } from 'react'
 
 import { gameContext } from '../context/machines'
@@ -18,7 +19,12 @@ export default function Home() {
       </Head>
 
       <main>
-        {gameState.matches('menu') && <Menu />}
+        {gameState.matches('menu') && (
+          <div className="my-32">
+            <Menu />
+          </div>
+        )}
+
         {gameState.matches('playing') && (
           <div className="game" style={{ width: '100%' }}>
             <div className="board-wrapper">
