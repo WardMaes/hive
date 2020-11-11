@@ -1,17 +1,17 @@
 import Image from 'next/image'
 import { useContext } from 'react'
 
-import { Insect, InsectName } from '../lib/insect'
+import { InsectName } from '../lib/insect'
 import { gameContext } from '../context/machines'
 import { PlayerHand } from '../lib/game'
 
 type InsectSelectorProps = {
-  // TODO needs a rename
+  // TODO: rename
   insects: PlayerHand
 }
 
 const InsectSelector = ({ insects }: InsectSelectorProps) => {
-  const [test, sendToGame] = useContext(gameContext)
+  const [, sendToGame] = useContext(gameContext)
 
   let individualInsects: InsectName[] = []
   insects.forEach((count, insectName) => {
@@ -34,7 +34,7 @@ const InsectSelector = ({ insects }: InsectSelectorProps) => {
             height="50"
             alt={`${insectName}`}
             priority
-          ></Image>
+          />
         </div>
       ))}
     </div>
