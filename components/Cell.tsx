@@ -1,4 +1,5 @@
 import React, { useContext } from 'react'
+import Image from 'next/image'
 
 import { gameContext } from '../context/machines'
 
@@ -24,6 +25,7 @@ const Cell = ({
   const selectedPiece = gameState.context.selectedPiece
   const isSelected =
     selectedPiece && haveSameCubeCoordinates(selectedPiece.coord, cell.coord)
+  const topPiece = cell.pieces[cell.pieces.length - 1]
 
   return (
     <div
@@ -32,16 +34,25 @@ const Cell = ({
     >
       <div
         className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
-        onClick={
-          selectable ? () => sendToGame('CELL.SELECT', { cell }) : undefined
-        }
+        onClick={() => selectable && sendToGame('CELL.SELECT', { cell })}
       >
-        <div className="cell_clip">
-          <div className="insect">
-            {cell.pieces.length
-              ? cell.pieces.map((piece) => piece.insect.name).join(', ')
-              : ''}
-          </div>
+        <div
+          className={
+            'cell_clip ' + (topPiece?.ofPlayer === 1 ? 'player-1' : 'player-2')
+          }
+        >
+          {topPiece ? (
+            <div className="insect" style={{ padding: '20%' }}>
+              <Image
+                src={`/icons/${topPiece.insect.name.toLowerCase()}.svg`}
+                unsized
+                alt={`${topPiece.insect.name}`}
+                priority
+              />
+            </div>
+          ) : (
+            <div />
+          )}
         </div>
       </div>
     </div>
