@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react'
 import { gameContext } from '../context/machines'
 
 const Menu = () => {
-  const [gameState, sendToGame] = useContext(gameContext)
+  const [, sendToGame] = useContext(gameContext)
   const [code, setCode] = useState('')
 
   return (

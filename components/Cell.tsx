@@ -22,7 +22,7 @@ const Cell = ({
 }: CellProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
-  const selectedPiece = gameState.context.selectedPiece
+  const selectedPiece = gameState.context.selectedCell
   const isSelected =
     selectedPiece && haveSameCubeCoordinates(selectedPiece.coord, cell.coord)
   const topPiece = cell.pieces[cell.pieces.length - 1]
@@ -33,7 +33,12 @@ const Cell = ({
       style={{ gridColumnStart, gridRowStart }}
     >
       <div
-        className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
+        className={
+          'cell_content' +
+          (isSelected
+            ? '' /* TODO: add cell-occupied as class if selected */
+            : '')
+        }
         onClick={() => selectable && sendToGame('CELL.SELECT', { cell })}
       >
         <div

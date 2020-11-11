@@ -1,6 +1,5 @@
-import { Cell, Piece } from '../../lib/game'
-import { Insect, InsectName } from '../../lib/insect'
-import { HexCoord, Move } from '../../lib/hex'
+import { Cell } from '../../lib/game'
+import { InsectName } from '../../lib/insect'
 
 /* 
     Context
@@ -13,7 +12,6 @@ export interface TurnContext {
   selectedUnplayedInsect?: InsectName
   selectedCell?: Cell
   placementCells?: Cell[]
-
   selectableCells: Cell[]
 }
 

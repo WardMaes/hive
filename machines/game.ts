@@ -1,10 +1,5 @@
 import { Machine, assign, MachineOptions } from 'xstate'
-import {
-  getStartInsectsPlayer,
-  getValidPlacementCoordinates,
-  isGameOver,
-  filterValidInsectsToPlace,
-} from '../lib/game'
+import { getStartInsectsPlayer } from '../lib/game'
 
 import { Context, Event } from './types'
 import {
@@ -33,8 +28,8 @@ const gameMachineInitialContext: GameContext = {
   boardCells: [],
   currentPlayer: 1,
   turn: 1,
-  unplayedInsectsPlayer1: getStartInsectsPlayer([]),
-  unplayedInsectsPlayer2: getStartInsectsPlayer([]),
+  unplayedInsectsPlayer1: getStartInsectsPlayer(),
+  unplayedInsectsPlayer2: getStartInsectsPlayer(),
 }
 
 const gameMachineSansOptions = Machine<Context, Schema, Event>({
@@ -92,12 +87,12 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
 
 const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
-    createRoom: (context, event) => {
+    createRoom: () => {
       // console.log('actions.createRoom', context, event)
       // create new room, with user as host
       createRoom()
     },
-    joinRoom: (context, event) => {
+    joinRoom: (_, event) => {
       // console.log('actions.createRoom', context, event)
       // create new room, with user as host
       // @ts-ignore
@@ -105,7 +100,7 @@ const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
     },
   },
   guards: {
-    isGameOver: (context) => {
+    isGameOver: () => {
       // return isGameOver(context.boardCells)
       return false
     },

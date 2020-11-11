@@ -1,4 +1,3 @@
-import { REPL_MODE_STRICT } from 'repl'
 import {
   Move,
   walkPerimeter,
@@ -8,7 +7,6 @@ import {
   checkOccupationInLookupTable,
   shiftAlongAxis,
   getNeighbours,
-  haveSameCubeCoordinates,
 } from '../lib/hex'
 import { Cell } from './game'
 
@@ -176,7 +174,7 @@ export const Beetle: Insect = {
   },
 }
 
-const isSurrounded = (cell: Cell, allCells: Cell[]): Boolean => {
+export const isSurrounded = (cell: Cell, allCells: Cell[]): Boolean => {
   const { coord } = cell
   const allCoords = allCells.map((cell) => cell.coord)
 

@@ -4,7 +4,6 @@ import {
   getNeighbours,
   HexCoord,
   hexCoordsToLookupTable,
-  getArticulationPointsHexCoordinates,
   haveSameCubeCoordinates,
   uniqueCoordinates,
 } from './hex'
@@ -38,9 +37,7 @@ const insectsForExpansion = {
   ],
 }
 
-export const getStartInsectsPlayer = (
-  expansions: GameExpansion[]
-): PlayerHand => {
+export const getStartInsectsPlayer = (): PlayerHand => {
   let insects: Map<InsectName, number> = new Map()
   // Base game
   insectsForExpansion.base.forEach(({ insect, count }) => {
@@ -108,7 +105,7 @@ export const filterValidInsectsToPlace = (
     return [InsectName.queen]
   } else {
     const insectNames: InsectName[] = []
-    unplacedInsects.forEach((count, insectName) => {
+    unplacedInsects.forEach((_, insectName) => {
       insectNames.push(insectName)
     })
     return insectNames
@@ -187,34 +184,34 @@ const getControllingPlayerOfCell = ({ pieces }: Cell): number => {
   return pieces[pieces.length - 1].ofPlayer
 }
 
-// TODO Check if moving piece on top would break the hive (only one on the stack + articulation point check)
-const movementWouldBreakHive = (cell: Cell): Boolean => {
-  // Can only be broken if it is the bottom level
-  // if (cell.pieces.length > 1) {
-  //   return false
-  // } else {
-  //   const articPoints = getArticulationPointsHexCoordinates(
-  //     this.boardCells.map((cell) => cell.coord)
-  //   )
-  //   return
-  // }
-  return true
-}
+// // TODO Check if moving piece on top would break the hive (only one on the stack + articulation point check)
+// const movementWouldBreakHive = (cell: Cell): Boolean => {
+//   // Can only be broken if it is the bottom level
+//   // if (cell.pieces.length > 1) {
+//   //   return false
+//   // } else {
+//   //   const articPoints = getArticulationPointsHexCoordinates(
+//   //     this.boardCells.map((cell) => cell.coord)
+//   //   )
+//   //   return
+//   // }
+//   return true
+// }
 
-const getValidCellsToMove = (currentPlayer: number): Cell[] => {
-  // // Check if queen has been placed
-  // const playersQueenBeenPlaced =
-  //   (currentPlayer === 1
-  //     ? this.unplayedInsectsPlayer1
-  //     : this.unplayedInsectsPlayer2
-  //   ).findIndex((insect) => insect === Queen) === -1
-  // if (playersQueenBeenPlaced) {
-  //   // Get all cells which have a piece of current player on top
-  //   const cellsWithPieceOfPlayerOnTop = this.boardCells.filter(
-  //     ({ pieces }) => pieces[pieces.length - 1].ofPlayer === currentPlayer
-  //   )
-  //   const dontBreakHive =
-  // }
-  // return []
-  return []
-}
+// const getValidCellsToMove = (currentPlayer: number): Cell[] => {
+//   // // Check if queen has been placed
+//   // const playersQueenBeenPlaced =
+//   //   (currentPlayer === 1
+//   //     ? this.unplayedInsectsPlayer1
+//   //     : this.unplayedInsectsPlayer2
+//   //   ).findIndex((insect) => insect === Queen) === -1
+//   // if (playersQueenBeenPlaced) {
+//   //   // Get all cells which have a piece of current player on top
+//   //   const cellsWithPieceOfPlayerOnTop = this.boardCells.filter(
+//   //     ({ pieces }) => pieces[pieces.length - 1].ofPlayer === currentPlayer
+//   //   )
+//   //   const dontBreakHive =
+//   // }
+//   // return []
+//   return []
+// }

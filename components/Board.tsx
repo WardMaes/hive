@@ -25,8 +25,8 @@ const convertCellToGridLocation = (
   }
 }
 
-const Board = ({ cells, selectableCells }: BoardProps) => {
-  const [state, send] = useContext(gameContext)
+const Board = ({ cells }: BoardProps) => {
+  const [state] = useContext(gameContext)
 
   // Calculating properties to calculate size of board as a grid and to map coordinates
   const minXCoordinate = cells.reduce(

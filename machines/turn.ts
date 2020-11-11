@@ -1,6 +1,5 @@
-import { assign, Actions, MachineConfig, MachineOptions } from 'xstate'
-// const { raise } = actions
-import { haveSameCubeCoordinates, HexCoord } from '../lib/hex'
+import { assign, MachineOptions } from 'xstate'
+import { haveSameCubeCoordinates } from '../lib/hex'
 import {
   getValidPlacementCoordinates,
   createTempEmptyCell,
@@ -10,7 +9,7 @@ import {
   Cell,
 } from '../lib/game'
 import { Context, Event } from './types'
-import { TurnContext } from './types/turn.types'
+import { TurnContext, TurnEvent } from './types/turn.types'
 
 export interface TurnStateSchema {
   initial: 'selecting'
@@ -35,7 +34,7 @@ export const turnMachine: TurnStateSchema = {
         'setCellsAllowedToMove',
         'setInsectsAllowedToPlace',
         assign<Context, Event>({
-          selectableCells: (context, event) => context.cellsAllowedToMove!,
+          selectableCells: (context) => context.cellsAllowedToMove!,
         }),
       ],
       on: {
@@ -45,17 +44,18 @@ export const turnMachine: TurnStateSchema = {
     },
     selectedToPlace: {
       entry: [
-        assign<Context, Event>({
-          selectedUnplayedInsect: (context: Context, event: Event) =>
+        assign<Context, TurnEvent>({
+          selectedUnplayedInsect: (_: Context, event: TurnEvent) =>
+            // @ts-ignore TODO
             event.insectName,
         }),
         'createAndSetPlacementCells',
         assign<Context, Event>({
-          cells: (context, event) => [
+          cells: (context) => [
             ...context.boardCells,
             ...context.placementCells!,
           ],
-          selectableCells: (context, event) => [
+          selectableCells: (context) => [
             ...context.selectableCells,
             ...context.placementCells!,
           ],
@@ -86,9 +86,9 @@ export const turnMachine: TurnStateSchema = {
         'resetPlacementCells',
         'placeInsectAndUpdateUnplaced',
         assign<Context, Event>({
-          placementCells: (context, event) => [],
-          selectableCells: (context, event) => [],
-          cells: (context, event) => [...context.boardCells],
+          placementCells: () => [],
+          selectableCells: () => [],
+          cells: (context) => [...context.boardCells],
         }),
       ],
       after: {
@@ -112,11 +112,13 @@ export const turnMachine: TurnStateSchema = {
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
     setSelectedCell: assign({
-      selectedCell: (context, event) => event.cell,
+      // @ts-ignore TODO
+      selectedCell: (_, event) => event.cell,
     }),
+    // @ts-ignore TODO
     setCellsAllowedToMove: assign({
       // cellsAllowedToMove: (context) => context.game.
-      cellsAllowedToMove: (context) => [],
+      cellsAllowedToMove: () => [],
     }),
     setInsectsAllowedToPlace: assign({
       insectsAllowedToPlace: (context) =>
@@ -128,7 +130,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
         ),
     }),
     createAndSetPlacementCells: assign({
-      placementCells: (context, event) => {
+      placementCells: (context) => {
         const validPlacementCoords = getValidPlacementCoordinates(
           context.boardCells,
           context.currentPlayer
@@ -139,7 +141,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
       },
     }),
     placeInsectAndUpdateUnplaced: assign({
-      unplayedInsectsPlayer1: (context, event) => {
+      unplayedInsectsPlayer1: (context) => {
         if (context.currentPlayer === 1) {
           return removeInsectFromUnplayed(
             context.unplayedInsectsPlayer1,
@@ -149,7 +151,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
           return context.unplayedInsectsPlayer1
         }
       },
-      unplayedInsectsPlayer2: (context, event) => {
+      unplayedInsectsPlayer2: (context) => {
         if (context.currentPlayer === 1) {
           return removeInsectFromUnplayed(
             context.unplayedInsectsPlayer2,
@@ -159,7 +161,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
           return context.unplayedInsectsPlayer2
         }
       },
-      boardCells: (context, event) => [
+      boardCells: (context) => [
         ...context.boardCells,
         createCellWithInsect(
           context.selectedCell!.coord,
@@ -171,14 +173,16 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   },
   guards: {
     // New selection is same as previous selection, indicating a toggle
-    toggledCellSelection: (context, event) => {
+    toggledCellSelection: () => {
       // context.selectedCell
       return false
     },
     toggledUnplayedInsectSelection: (context, event) => {
+      // @ts-ignore TODO
       return event.insectName === context.selectedUnplayedInsect
     },
     selectedCellIsTempPlacementCell: (context, event) => {
+      // @ts-ignore TODO
       const selectedCell: Cell = event.cell
       return (
         // TODO would be nicer to create game method to check equivalence of cells rather than comparing with hex method of coordinates

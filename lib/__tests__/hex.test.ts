@@ -7,8 +7,6 @@ import {
   hexCoordsToLookupTable,
   checkOccupationInLookupTable,
   isHexCoordinateArticulationPoint,
-  walkPerimeter,
-  getArticulationPointsHexCoordinates,
 } from '../hex'
 
 describe('Hex coordinate logic', () => {
