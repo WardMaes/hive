@@ -1,4 +1,5 @@
 import React, { useContext } from 'react'
+import classNames from 'classnames'
 import Image from 'next/image'
 
 import { gameContext } from '../context/machines'
@@ -22,29 +23,32 @@ const Cell = ({
 }: CellProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
-  const selectedPiece = gameState.context.selectedCell
+  const selectedCell = gameState.context.selectedCell
   const isSelected =
-    selectedPiece && haveSameCubeCoordinates(selectedPiece.coord, cell.coord)
+    selectedCell && haveSameCubeCoordinates(selectedCell.coord, cell.coord)
   const topPiece = cell.pieces[cell.pieces.length - 1]
 
   return (
     <div
-      className={'cell' + (isSelected ? ' cell-z' : '')}
+      className={classNames('cell', {
+        'cell-z': isSelected,
+        tempCell: !topPiece,
+      })}
+      // className={'cell' + (isSelected ? ' cell-z' : '')}
       style={{ gridColumnStart, gridRowStart }}
     >
       <div
-        className={
-          'cell_content' +
-          (isSelected
-            ? '' /* TODO: add cell-occupied as class if selected */
-            : '')
-        }
+        className={classNames('cell_content', {
+          isSelected: false /* TODO: add cell-occupied as class if selected */,
+        })}
         onClick={() => selectable && sendToGame('CELL.SELECT', { cell })}
       >
         <div
-          className={
-            'cell_clip ' + (topPiece?.ofPlayer === 1 ? 'player-1' : 'player-2')
-          }
+          className={classNames('cell_clip ', {
+            'player-1': topPiece && topPiece.ofPlayer === 1,
+            'player-2': topPiece && topPiece.ofPlayer === 2,
+            // (topPiece?.ofPlayer === 1 ? 'player-1' : 'player-2')
+          })}
         >
           {topPiece ? (
             <div className="insect" style={{ padding: '20%' }}>

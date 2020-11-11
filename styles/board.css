@@ -29,6 +29,14 @@
   /* sqrt(3)/2 * 2 * length_side_hex for height regular hexagon (plus some extra because boetiful)*/
   padding-bottom: 88.6025%;
   cursor: pointer;
+
+  --hex-border: 0px;
+  --hex-border-color: #00000000;
+}
+
+.cell.tempCell {
+  --hex-border: 5px;
+  --hex-border-color: #7a7878;
 }
 
 .cell:hover {
@@ -36,24 +44,27 @@
 }
 
 .cell_content {
+  /*Default is tranparent*/
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-}
+  clip-path: polygon(75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%, 25% 0);
 
-.cell_content.cell-occupied .cell_clip {
-  background-color: #fdadad;
+  background-color: var(--hex-border-color);
 }
 
 .cell_clip {
   clip-path: polygon(75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%, 25% 0);
   position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  background-color: #edf2f7;
+  left: var(--hex-border);
+  top: var(--hex-border);
+  right: var(--hex-border);
+  bottom: var(--hex-border);
+  height: calc(100% - 2 * var(--hex-border));
+  width: calc(100% - 2 * var(--hex-border));
+  background-color: #dfdfdf;
   text-align: center; /* For debugging purposes */
   display: flex;
   justify-content: center;
@@ -92,6 +103,10 @@
   border: 1px solid darkgray;
   padding: 1rem;
   margin: 0.1rem;
+}
+
+.insect__selected {
+  background-color: #2962c4;
 }
 
 .insect-wrap:hover {
