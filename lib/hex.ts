@@ -242,14 +242,18 @@ const getArticulationPointsHexCoordinatesRecHelper = (
 
 export const walkPerimeter = (
   startCoord: HexCoord,
-  otherHexs: HexCoord[],
+  allCoords: HexCoord[],
   max_distance = Infinity
 ): Move[] => {
   // FFS WTF JAVASCRIPT
   const actualModulo = (a: number, b: number): number =>
     a >= 0 ? a % b : b + (a % b)
+  // Make sure to filter the startCoord from all coordinates
+  const allCoordsExclStart = allCoords.filter(
+    (coord) => !haveSameCubeCoordinates(coord, startCoord)
+  )
   // Create lookup table
-  const lookUp = hexCoordsToLookupTable<null>(otherHexs)
+  const lookUp = hexCoordsToLookupTable<null>(allCoordsExclStart)
   const discovered: HexCoord[] = [startCoord]
   let idx = 0
   const foundMoves: Move[] = [
@@ -269,7 +273,7 @@ export const walkPerimeter = (
       path: prevPath,
     } = foundMoves[idx]
     // Dont look for larger paths if the maximum distance has been reached
-    if (!(prevLength + 1 >= max_distance)) {
+    if (prevLength + 1 <= max_distance) {
       const neighbors = getNeighbours(lastCoord)
       // A neighbor is a valid position if
       const validNeighbors = neighbors

@@ -98,12 +98,21 @@ export const turnMachine: TurnStateSchema = {
       },
     },
     selectedToMove: {
-      entry: ['setSelectedCell'],
-      actions: [
-        // Generate possible moves
+      entry: [
+        'setSelectedCell',
         'generateAndSetPossibleMoves',
-        // Set destinations on context in way which UI can interact with it
-        assign({}),
+        assign<Context, Event>({
+          cells: (context) => [
+            ...context.validMoves.map((move) =>
+              createTempEmptyCell(move.destination)
+            ),
+            ...context.boardCells,
+          ],
+        }),
+      ],
+      actions: [
+        ,// Generate possible moves
+      // Set destinations on context in way which UI can interact with it
       ],
       on: {
         'CELL.SELECT': [
@@ -142,7 +151,7 @@ export const turnMachine: TurnStateSchema = {
         ],
         'UNPLAYEDPIECE.SELECT': [
           // If a placable insect is selected, switch to placing that
-          { target: 'selectedToPlace' },
+          { target: 'selectedToPlace', actions: ['resetSelectedCell'] },
         ],
       },
     },
@@ -190,10 +199,13 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
     generateAndSetPossibleMoves: assign({
       validMoves: (context) => {
+        console.log('enter')
         const selectedCell = context.selectedCell!
         const boardCells = context.boardCells
 
-        return getValidMovesForCell(selectedCell, boardCells)
+        const moves = getValidMovesForCell(selectedCell, boardCells)
+        console.log(moves)
+        return moves
       },
     }),
     setSelectedCell: assign({

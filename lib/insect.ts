@@ -105,7 +105,7 @@ export const Grasshopper: Insect = {
             // After encountering a cell that is not occupied, the move is finished
             validMoves.push({
               length: distance,
-              destination: path[-1],
+              destination: path[path.length - 1],
               path: path,
             })
           }

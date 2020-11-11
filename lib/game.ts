@@ -208,9 +208,9 @@ export const getValidCellsToMove = (
   playerHand: PlayerHand,
   boardCells: Cell[]
 ): Cell[] => {
-  const playersQueenBeenPlaced =
+  const playersQueenNotPlayed =
     playerHand.get(InsectName.queen) && playerHand.get(InsectName.queen)! > 0
-  if (playersQueenBeenPlaced) {
+  if (!playersQueenNotPlayed) {
     const cellsControlledByPlayer = getCellsControlledByPlayer(
       boardCells,
       currentPlayer
@@ -232,7 +232,6 @@ export const getValidCellsToMove = (
       }
       return false
     })
-    console.log(validToMove)
     return validToMove
   }
   return []
