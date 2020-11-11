@@ -19,6 +19,7 @@ export interface TurnStateSchema {
     selectedToPlace: {}
     placing: {}
     moving: {}
+    finish: {}
   }
 }
 
@@ -41,6 +42,7 @@ export const turnMachine: TurnStateSchema = {
         'setCellsAllowedToMove',
         'setInsectsAllowedToPlace',
         assign<Context, Event>({
+          cells: (context) => [...context.boardCells],
           selectableCells: (context) => context.cellsAllowedToMove!,
         }),
       ],
@@ -83,7 +85,11 @@ export const turnMachine: TurnStateSchema = {
         ],
         'UNPLAYEDPIECE.SELECT': [
           // Check if selected piece was toggled
-          { target: 'selecting', cond: 'toggledUnplayedInsectSelection' },
+          {
+            target: 'selecting',
+            cond: 'toggledUnplayedInsectSelection',
+            actions: ['resetSelectedUnplayedInsect'],
+          },
           // Otherwise selected another unplayed insect to place
           { target: 'selectedToPlace' },
         ],
@@ -92,28 +98,40 @@ export const turnMachine: TurnStateSchema = {
     // 'placing' and 'moving' states might possibly be merged into 1 state called 'playing'
     placing: {
       entry: [
-        'resetPlacementCells',
+        // 'resetPlacementCells',
         'placeInsectAndUpdateUnplaced',
         assign<Context, Event>({
           placementCells: () => [],
-          selectableCells: () => [],
-          cells: (context) => [...context.boardCells],
         }),
       ],
-      after: {
-        // After a 1s animation, go to finished state
-        500: '#check',
-      },
+      always: [{ target: 'finish' }],
+      // after: {
+      //   // After a 1s animation, go to finished state
+      //   500: '#check',
+      // },
     },
     moving: {
       // Animation to be played in frontend while in this state
       entry: assign({
         cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
       }),
-      after: {
-        // After a 1s animation, go to finished state
-        500: '#check',
-      },
+      always: [{ target: 'finish' }],
+      // after: {
+      //   // After a 1s animation, go to finished state
+      //   500: '#check',
+      // },
+    },
+    finish: {
+      entry: [
+        // Cleanup
+        assign<Context, Event>({
+          selectedCell: () => undefined,
+          selectedUnplayedInsect: () => undefined,
+          selectableCells: () => [],
+          cells: (context) => [...context.boardCells],
+        }),
+      ],
+      always: [{ target: '#check' }],
     },
   },
 }
@@ -159,7 +177,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
         }
       },
       unplayedInsectsPlayer2: (context) => {
-        if (context.currentPlayer === 1) {
+        if (context.currentPlayer === 2) {
           return removeInsectFromUnplayed(
             context.unplayedInsectsPlayer2,
             context.selectedUnplayedInsect!
@@ -176,6 +194,9 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
           context.currentPlayer
         ),
       ],
+    }),
+    resetSelectedUnplayedInsect: assign({
+      selectedUnplayedInsect: (context) => undefined,
     }),
   },
   guards: {

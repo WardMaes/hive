@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { useContext } from 'react'
+import classNames from 'classnames'
 
 import { InsectName } from '../lib/insect'
 import { gameContext } from '../context/machines'
@@ -11,7 +12,12 @@ type InsectSelectorProps = {
 }
 
 const InsectSelector = ({ insects }: InsectSelectorProps) => {
-  const [, sendToGame] = useContext(gameContext)
+  const [gameState, sendToGame] = useContext(gameContext)
+
+  console.log(
+    gameState.context.unplayedInsectsPlayer1,
+    gameState.context.unplayedInsectsPlayer2
+  )
 
   let individualInsects: InsectName[] = []
   insects.forEach((count, insectName) => {
@@ -22,7 +28,10 @@ const InsectSelector = ({ insects }: InsectSelectorProps) => {
     <div className="flex flex-row justify-center content-center h-full flex-wrap">
       {individualInsects.map((insectName, i) => (
         <div
-          className="insect"
+          className={classNames('insect', {
+            insect__selected:
+              gameState.context.selectedUnplayedInsect! === insectName,
+          })}
           key={i + 1}
           onClick={() => {
             sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
