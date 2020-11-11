@@ -30,7 +30,7 @@ export const getNeighbours = (hexCoord: HexCoord): HexCoord[] => {
 const haveSameCubeCoordinates = (
   coordA: HexCoord,
   coordB: HexCoord
-): Boolean => {
+): boolean => {
   return coordA.x == coordB.x && coordA.y == coordB.y && coordA.z == coordB.z
 }
 
