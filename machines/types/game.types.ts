@@ -1,5 +1,4 @@
-import { Cell, Game } from '../../lib/game'
-import { Insect } from '../../lib/insect'
+import { Cell, PlayerHand } from '../../lib/game'
 // import {  } from "../../lib/game";
 
 /* 
@@ -7,17 +6,22 @@ import { Insect } from '../../lib/insect'
 */
 
 export interface GameContext {
-  // Game-specific context
-  cellsOnBoard?: Cell[]
+  // TODO dislike the 2 seperate cells collections, possible alternative
+  // Specific for frontend, all cells to render
+  cells: Cell[]
+  // For internal use, keeps track of all permanent cells on board which contain pieces
+  boardCells: Cell[]
   currentPlayer: number
-  game?: Game
   turn: number
-  unplacedInsectsPlayer1?: Insect[]
-  unplacedInsectsPlayer2?: Insect[]
+  unplayedInsectsPlayer1: PlayerHand
+  unplayedInsectsPlayer2: PlayerHand
 }
 
 /* 
     Event
 */
 
-export type GameEvent = { type: 'TURN.OVER' }
+export type GameEvent =
+  | { type: 'TURN.OVER' }
+  | { type: 'GAME.JOIN' }
+  | { type: 'GAME.CREATE' }

@@ -1,5 +1,5 @@
 import { Cell, Piece } from '../../lib/game'
-import { Insect } from '../../lib/insect'
+import { Insect, InsectName } from '../../lib/insect'
 import { HexCoord, Move } from '../../lib/hex'
 
 /* 
@@ -9,11 +9,12 @@ import { HexCoord, Move } from '../../lib/hex'
 export interface TurnContext {
   cellsPossibleDestinationsCurrentMove?: Cell[]
   cellsAllowedToMove?: Cell[]
-  insectsAllowedToPlace?: Insect[]
-  placementCoord?: HexCoord
-  selectedPiece?: Cell
-  selectedToPlace?: Insect
-  validPlacementCoords?: HexCoord[]
+  insectsAllowedToPlace?: InsectName[]
+  selectedUnplayedInsect?: InsectName
+  selectedCell?: Cell
+  placementCells?: Cell[]
+
+  selectableCells: Cell[]
 }
 
 /* 
@@ -22,8 +23,8 @@ export interface TurnContext {
 
 export type TurnEvent =
   // | { type: 'MOVE'; move: Move }
-  | { type: 'CELL.CLICK'; cell: Cell }
-  | { type: 'UNPLAYEDPIECE.CLICK'; piece: Piece }
+  | { type: 'CELL.SELECT'; cell: Cell }
+  | { type: 'UNPLAYEDPIECE.SELECT'; insectName: InsectName }
 // | { type: 'MOVESELECT'; cell: Cell }
 // | { type: 'PLACE'; coord: HexCoord }
 // | { type: 'PLACESELECT'; insect: Insect }
