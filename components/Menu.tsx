@@ -7,7 +7,10 @@ const Menu = () => {
 
   return (
     <div className="flex flex-col justify-center ">
-      <button className="btn" onClick={() => sendToGame('GAME.CREATE')}>
+      <button
+        className="btn hover:bg-gray-400"
+        onClick={() => sendToGame('GAME.CREATE')}
+      >
         Create game
       </button>
 
@@ -25,7 +28,7 @@ const Menu = () => {
           onChange={(e) => setCode(e.target.value)}
         />
         <button
-          className={'btn' + (!code ? ' btn-disabled' : '')}
+          className={'btn' + (!code ? ' btn-disabled' : ' hover:bg-gray-400')}
           type="submit"
           disabled={!code}
         >
