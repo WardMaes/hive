@@ -1,4 +1,5 @@
 import { Cell } from '../../lib/game'
+import { Move } from '../../lib/hex'
 import { InsectName } from '../../lib/insect'
 
 /* 
@@ -6,12 +7,14 @@ import { InsectName } from '../../lib/insect'
 */
 
 export interface TurnContext {
-  cellsPossibleDestinationsCurrentMove: Cell[]
+  validMoves: Move[]
   cellsAllowedToMove: Cell[]
   insectsAllowedToPlace: InsectName[]
   selectedUnplayedInsect?: InsectName
   selectedCell?: Cell
+  // TODO Merge to validDestinaitons and add collection of newly created cells to handle the rest
   placementCells?: Cell[]
+  validDestinations: Cell[]
   selectableCells: Cell[]
 }
 

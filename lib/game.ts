@@ -1,13 +1,16 @@
 // import { Cell } from '../machines/game'
 import {
-  checkOccupationInLookupTable,
-  getNeighbours,
   HexCoord,
+  Move,
+  checkOccupationInLookupTable,
+  getArticulationPointsHexCoordinates,
+  getNeighbours,
   hexCoordsToLookupTable,
   haveSameCubeCoordinates,
   uniqueCoordinates,
 } from './hex'
-import { getInsectByName, InsectName, Insect, Queen } from './insect'
+// import { getInsectByName, InsectName, Insect, Queen } from './insect'
+import { getInsectByName, InsectName } from './insect'
 
 export type Board = {
   cells: Cell[]
@@ -19,7 +22,8 @@ export type Cell = {
 }
 export type Piece = {
   ofPlayer: number
-  insect: Insect
+  // insect: Insect
+  insectName: InsectName
 }
 export type PlayerHand = Map<InsectName, number>
 export type GameConfig = {
@@ -37,6 +41,45 @@ const insectsForExpansion = {
   ],
 }
 
+/* 
+  General
+*/
+
+export const createCellWithInsect = (
+  hexCoord: HexCoord,
+  insectName: InsectName,
+  player: number
+): Cell => {
+  return {
+    coord: hexCoord,
+    pieces: [
+      {
+        insectName: insectName,
+        // insect: getInsectByName(insectName),
+        ofPlayer: player,
+      },
+    ],
+  }
+}
+
+export const createTempEmptyCell = (hexCoord: HexCoord): Cell => {
+  return {
+    coord: hexCoord,
+    pieces: [],
+  }
+}
+
+export const getTopPieceOfCell = ({ pieces }: Cell): Piece | null => {
+  if (pieces.length) {
+    return pieces[pieces.length - 1]
+  }
+  return null
+}
+
+/* 
+  Game specific
+*/
+
 export const getStartInsectsPlayer = (): PlayerHand => {
   let insects: Map<InsectName, number> = new Map()
   // Base game
@@ -50,7 +93,9 @@ export const isGameOver = (boardCells: Cell[]): boolean => {
   // Find queens
   const queenCoords = boardCells
     .filter(({ pieces }) => {
-      return pieces.findIndex((piece) => piece.insect === Queen) != -1
+      return (
+        pieces.findIndex((piece) => piece.insectName === InsectName.queen) != -1
+      )
     })
     .map(({ coord }) => coord)
   const lookUp = hexCoordsToLookupTable(boardCells.map((cell) => cell.coord))
@@ -62,21 +107,13 @@ export const isGameOver = (boardCells: Cell[]): boolean => {
   )
 }
 
-export const createCellWithInsect = (
-  hexCoord: HexCoord,
-  insectName: InsectName,
-  player: number
-): Cell => {
-  return {
-    coord: hexCoord,
-    pieces: [
-      {
-        insect: getInsectByName(insectName),
-        ofPlayer: player,
-      },
-    ],
-  }
-}
+/* 
+  TURN SPECIFIC
+*/
+
+/* 
+  Placing
+*/
 
 export const removeInsectFromUnplayed = (
   unplayedInsectsOfPlayer: PlayerHand,
@@ -151,12 +188,59 @@ export const getValidPlacementCoordinates = (
   return uniqueCoordinates(validCoords)
 }
 
-export const createTempEmptyCell = (hexCoord: HexCoord): Cell => {
-  return {
-    coord: hexCoord,
-    pieces: [],
+/* 
+  Moving
+*/
+
+export const getValidMovesForCell = (
+  cell: Cell,
+  boardCells: Cell[]
+): Move[] => {
+  const insectName = getTopPieceOfCell(cell)?.insectName
+  if (insectName) {
+    return getInsectByName(insectName).validMoves(cell, boardCells)
   }
+  return []
 }
+
+export const getValidCellsToMove = (
+  currentPlayer: number,
+  playerHand: PlayerHand,
+  boardCells: Cell[]
+): Cell[] => {
+  const playersQueenBeenPlaced =
+    playerHand.get(InsectName.queen) && playerHand.get(InsectName.queen)! > 0
+  if (playersQueenBeenPlaced) {
+    const cellsControlledByPlayer = getCellsControlledByPlayer(
+      boardCells,
+      currentPlayer
+    )
+    const articulationPointCoords = getArticulationPointsHexCoordinates(
+      boardCells.map((cell) => cell.coord)
+    )
+    const validToMove = cellsControlledByPlayer.filter((cell) => {
+      const heightTopPiece = cell.pieces.length - 1
+      if (heightTopPiece >= 0) {
+        if (
+          articulationPointCoords.findIndex((artCoord) =>
+            haveSameCubeCoordinates(artCoord, cell.coord)
+          ) === -1
+        ) {
+          // TODO intuition says unneccesary but maybe generate moves to check if moves are available for piece
+          return true
+        }
+      }
+      return false
+    })
+    console.log(validToMove)
+    return validToMove
+  }
+  return []
+}
+
+/* 
+  PRIVATE HELPERS
+*/
 
 const getCellsControlledByPlayer = (
   boardCells: Cell[],
@@ -180,8 +264,8 @@ const getOccupiedNeighborCellsOfCoord = (
   )
 }
 
-const getControllingPlayerOfCell = ({ pieces }: Cell): number => {
-  return pieces[pieces.length - 1].ofPlayer
+const getControllingPlayerOfCell = (cell: Cell): number | undefined => {
+  return getTopPieceOfCell(cell)?.ofPlayer
 }
 
 // // TODO Check if moving piece on top would break the hive (only one on the stack + articulation point check)
@@ -196,22 +280,4 @@ const getControllingPlayerOfCell = ({ pieces }: Cell): number => {
 //   //   return
 //   // }
 //   return true
-// }
-
-// const getValidCellsToMove = (currentPlayer: number): Cell[] => {
-//   // // Check if queen has been placed
-//   // const playersQueenBeenPlaced =
-//   //   (currentPlayer === 1
-//   //     ? this.unplayedInsectsPlayer1
-//   //     : this.unplayedInsectsPlayer2
-//   //   ).findIndex((insect) => insect === Queen) === -1
-//   // if (playersQueenBeenPlaced) {
-//   //   // Get all cells which have a piece of current player on top
-//   //   const cellsWithPieceOfPlayerOnTop = this.boardCells.filter(
-//   //     ({ pieces }) => pieces[pieces.length - 1].ofPlayer === currentPlayer
-//   //   )
-//   //   const dontBreakHive =
-//   // }
-//   // return []
-//   return []
 // }

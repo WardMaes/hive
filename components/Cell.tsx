@@ -6,7 +6,7 @@ import { gameContext } from '../context/machines'
 
 import { haveSameCubeCoordinates } from '../lib/hex'
 
-import { Cell as CellType } from '../lib/game'
+import { Cell as CellType, getTopPieceOfCell } from '../lib/game'
 
 type CellProps = {
   selectable: boolean
@@ -26,13 +26,15 @@ const Cell = ({
   const selectedCell = gameState.context.selectedCell
   const isSelected =
     selectedCell && haveSameCubeCoordinates(selectedCell.coord, cell.coord)
-  const topPiece = cell.pieces[cell.pieces.length - 1]
+  const topPiece = getTopPieceOfCell(cell)
 
   return (
     <div
       className={classNames('cell', {
-        'cell-z': isSelected,
+        // 'cell-z': isSelected,
+        selected: isSelected,
         tempCell: !topPiece,
+        selectable: selectable,
       })}
       // className={'cell' + (isSelected ? ' cell-z' : '')}
       style={{ gridColumnStart, gridRowStart }}
@@ -53,9 +55,9 @@ const Cell = ({
           {topPiece ? (
             <div className="insect" style={{ padding: '20%' }}>
               <Image
-                src={`/icons/${topPiece.insect.name.toLowerCase()}.svg`}
+                src={`/icons/${topPiece.insectName.toLowerCase()}.svg`}
                 unsized
-                alt={`${topPiece.insect.name}`}
+                alt={`${topPiece.insectName}`}
                 priority
               />
             </div>

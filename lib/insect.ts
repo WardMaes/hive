@@ -35,8 +35,7 @@ export const getInsectByName = (name: InsectName): Insect => {
 
 export type Insect = {
   name: InsectName
-  // TODO Currently put level in function but might move to Insect as property
-  validMoves: (insectCell: Cell, boardCells: Cell[], level: number) => Move[]
+  validMoves: (insectCell: Cell, boardCells: Cell[]) => Move[]
 }
 
 export const Spider: Insect = {
@@ -119,9 +118,10 @@ export const Grasshopper: Insect = {
 
 export const Beetle: Insect = {
   name: InsectName.beetle,
-  validMoves: ({ coord }, boardCells, level = 0) => {
+  validMoves: ({ coord, pieces }, boardCells) => {
     let moves: Move[] = []
     // Moving on the same level
+    const level = pieces.length - 1
     if (level == 0) {
       // Bottom level logic
       const level0Moves = walkPerimeter(

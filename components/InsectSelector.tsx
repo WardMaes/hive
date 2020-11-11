@@ -14,11 +14,6 @@ type InsectSelectorProps = {
 const InsectSelector = ({ insects }: InsectSelectorProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
-  console.log(
-    gameState.context.unplayedInsectsPlayer1,
-    gameState.context.unplayedInsectsPlayer2
-  )
-
   let individualInsects: InsectName[] = []
   insects.forEach((count, insectName) => {
     individualInsects = [...individualInsects, ...Array(count).fill(insectName)]

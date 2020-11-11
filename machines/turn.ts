@@ -1,22 +1,24 @@
 import { assign, MachineOptions } from 'xstate'
 import { haveSameCubeCoordinates } from '../lib/hex'
 import {
-  getValidPlacementCoordinates,
+  Cell,
   createTempEmptyCell,
   createCellWithInsect,
-  removeInsectFromUnplayed,
   filterValidInsectsToPlace,
-  Cell,
+  getValidCellsToMove,
+  getValidMovesForCell,
+  getValidPlacementCoordinates,
+  removeInsectFromUnplayed,
 } from '../lib/game'
 import { Context, Event } from './types'
 import { TurnContext } from './types/turn.types'
-import { InsectName } from '../lib/insect'
 
 export interface TurnStateSchema {
   initial: 'selecting'
   states: {
     selecting: {}
     selectedToPlace: {}
+    selectedToMove: {}
     placing: {}
     moving: {}
     finish: {}
@@ -25,12 +27,13 @@ export interface TurnStateSchema {
 
 export const turnMachineInitialContext: TurnContext = {
   selectableCells: [] as Cell[],
-  cellsPossibleDestinationsCurrentMove: [],
   cellsAllowedToMove: [],
   insectsAllowedToPlace: [],
   selectedUnplayedInsect: undefined,
   selectedCell: undefined,
   placementCells: undefined,
+  validDestinations: [],
+  validMoves: [],
 }
 
 export const turnMachine: TurnStateSchema = {
@@ -48,7 +51,7 @@ export const turnMachine: TurnStateSchema = {
       ],
       on: {
         'UNPLAYEDPIECE.SELECT': { target: 'selectedToPlace' },
-        // 'CELL.SELECT': { target: 'prepareToMove' },
+        'CELL.SELECT': { target: 'selectedToMove' },
       },
     },
     selectedToPlace: {
@@ -57,7 +60,7 @@ export const turnMachine: TurnStateSchema = {
           selectedUnplayedInsect: (_, event: Event) => {
             return event.type === 'UNPLAYEDPIECE.SELECT'
               ? event.insectName
-              : InsectName.ant
+              : undefined
           },
         }),
         'createAndSetPlacementCells',
@@ -78,7 +81,6 @@ export const turnMachine: TurnStateSchema = {
           {
             target: 'placing',
             cond: 'selectedCellIsTempPlacementCell',
-            actions: ['setSelectedCell'],
           },
           // Otherwise was an already placed cell and player wants to exit placement and enter movement with that piece
           // { target: "selectedToMove"}
@@ -95,10 +97,58 @@ export const turnMachine: TurnStateSchema = {
         ],
       },
     },
-    // 'placing' and 'moving' states might possibly be merged into 1 state called 'playing'
+    selectedToMove: {
+      entry: ['setSelectedCell'],
+      actions: [
+        // Generate possible moves
+        'generateAndSetPossibleMoves',
+        // Set destinations on context in way which UI can interact with it
+        assign({}),
+      ],
+      on: {
+        'CELL.SELECT': [
+          // Select a move destination cell
+          {
+            target: 'moving',
+            cond: (context: Context, event: Event) => {
+              if (event.type === 'CELL.SELECT') {
+                context.validDestinations.findIndex((destCell) =>
+                  haveSameCubeCoordinates(destCell.coord, event.cell.coord)
+                )
+              }
+              return false
+            },
+          },
+          // Toggle already selected cell
+          {
+            target: 'selecting',
+            cond: (context: Context, event: Event) => {
+              if (event.type === 'CELL.SELECT') {
+                return (
+                  context.selectedCell &&
+                  haveSameCubeCoordinates(
+                    context.selectedCell.coord,
+                    event.cell.coord
+                  )
+                )
+              }
+              return false
+            },
+            actions: ['resetSelectedCell'],
+          },
+          // Select another cell which is not the selected cell or one of its destinations
+          // If it is a cell that was valid to move, switch to moving with that cell
+          { target: 'selectedToMove' },
+        ],
+        'UNPLAYEDPIECE.SELECT': [
+          // If a placable insect is selected, switch to placing that
+          { target: 'selectedToPlace' },
+        ],
+      },
+    },
     placing: {
       entry: [
-        // 'resetPlacementCells',
+        'setSelectedCell',
         'placeInsectAndUpdateUnplaced',
         assign<Context, Event>({
           placementCells: () => [],
@@ -138,12 +188,27 @@ export const turnMachine: TurnStateSchema = {
 
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
+    generateAndSetPossibleMoves: assign({
+      validMoves: (context) => {
+        const selectedCell = context.selectedCell!
+        const boardCells = context.boardCells
+
+        return getValidMovesForCell(selectedCell, boardCells)
+      },
+    }),
     setSelectedCell: assign({
       selectedCell: (_, event) =>
         event.type === 'CELL.SELECT' ? event.cell : undefined,
     }),
     setCellsAllowedToMove: assign({
-      // cellsAllowedToMove: () => [] as Cell[],
+      cellsAllowedToMove: (context) =>
+        getValidCellsToMove(
+          context.currentPlayer,
+          context.currentPlayer === 1
+            ? context.unplayedInsectsPlayer1
+            : context.unplayedInsectsPlayer2,
+          context.boardCells
+        ),
     }),
     setInsectsAllowedToPlace: assign({
       insectsAllowedToPlace: (context) =>
@@ -195,8 +260,11 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
         ),
       ],
     }),
+    resetSelectedCell: assign({
+      selectedCell: (_) => undefined,
+    }),
     resetSelectedUnplayedInsect: assign({
-      selectedUnplayedInsect: (context) => undefined,
+      selectedUnplayedInsect: (_) => undefined,
     }),
   },
   guards: {

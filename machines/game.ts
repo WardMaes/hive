@@ -75,7 +75,7 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
           assign({
             // Increment turn if changed from player 2 to player 1
             turn: (context) =>
-              context.currentPlayer === 1 ? context.turn + 1 : context.turn + 1,
+              context.currentPlayer === 1 ? context.turn + 1 : context.turn,
           }),
         ],
         target: 'playing',

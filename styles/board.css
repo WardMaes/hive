@@ -28,10 +28,14 @@
   height: 0;
   /* sqrt(3)/2 * 2 * length_side_hex for height regular hexagon (plus some extra because boetiful)*/
   padding-bottom: 88.6025%;
-  cursor: pointer;
-
+  cursor: default;
   --hex-border: 0px;
   --hex-border-color: #00000000;
+}
+
+.cell.selected {
+  --hex-border: 5px;
+  --hex-border-color: #2962c4;
 }
 
 .cell.tempCell {
@@ -39,7 +43,11 @@
   --hex-border-color: #7a7878;
 }
 
-.cell:hover {
+.cell.selectable {
+  cursor: pointer;
+}
+
+.cell.selectable:hover {
   filter: drop-shadow(0px 0px 4px rgba(50, 50, 0, 0.5));
 }
 
@@ -85,7 +93,8 @@
 }
 
 .cell-z {
-  z-index: -1;
+  /* TODO Ward vragen waar dit voor diende want werkt tegen bij selectable klasse */
+  /* z-index: -1; */
 }
 
 .insect-selector {
@@ -98,7 +107,6 @@
 }
 
 .insect {
-  cursor: pointer;
   display: block;
   border: 1px solid darkgray;
   padding: 1rem;

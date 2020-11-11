@@ -132,9 +132,13 @@ export const isHexCoordinateArticulationPoint = (
 export const getArticulationPointsHexCoordinates = (
   hexCoords: HexCoord[]
 ): HexCoord[] => {
-  // Remove duplicates
-  // TODO probably delete later, higher level should only give hexes on the same level => no duplicate coords
+  if (hexCoords.length === 0) {
+    return []
+  }
   const startHexCoord = hexCoords[0]
+  if (hexCoords.length === 1) {
+    return [startHexCoord]
+  }
   const occupationLookup = hexCoordsToLookupTable<null>(hexCoords)
   const discovered: HexCoord[] = []
   const foundOrder: HexCoord[] = []
