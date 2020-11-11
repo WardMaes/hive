@@ -7,12 +7,18 @@ import { haveSameCubeCoordinates } from '../lib/hex'
 import { Cell as CellType } from '../lib/game'
 
 type CellProps = {
+  selectable: boolean
   cell: CellType
   gridColumnStart: number
   gridRowStart: number
 }
 
-const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
+const Cell = ({
+  selectable,
+  cell,
+  gridColumnStart,
+  gridRowStart,
+}: CellProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
   const selectedPiece = gameState.context.selectedPiece
@@ -26,7 +32,9 @@ const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
     >
       <div
         className={'cell_content' + (isSelected ? ' cell-occupied' : '')}
-        onClick={() => sendToGame(isSelected ? 'UNSELECT' : 'SELECT', { cell })}
+        onClick={
+          selectable ? () => sendToGame('CELL.SELECT', { cell }) : undefined
+        }
       >
         <div className="cell_clip">
           <div className="insect">

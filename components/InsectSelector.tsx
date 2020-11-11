@@ -1,27 +1,33 @@
 import { useContext } from 'react'
 
-import { Insect } from '../lib/insect'
+import { Insect, InsectName } from '../lib/insect'
 import { gameContext } from '../context/machines'
+import { PlayerHand } from '../lib/game'
 
 type InsectSelectorProps = {
-  insects: Insect[]
+  // TODO needs a rename
+  insects: PlayerHand
 }
 
 const InsectSelector = ({ insects }: InsectSelectorProps) => {
   const [test, sendToGame] = useContext(gameContext)
 
+  let individualInsects: InsectName[] = []
+  insects.forEach((count, insectName) => {
+    individualInsects = [...individualInsects, ...Array(count).fill(insectName)]
+  })
+
   return (
     <div className="flex flex-row justify-center content-center h-full flex-wrap">
-      {insects.map((insect, i) => (
+      {individualInsects.map((insectName, i) => (
         <div
           className="insect"
           key={i + 1}
           onClick={() => {
-            console.log(test)
-            sendToGame('PLACESELECT', { insect })
+            sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
           }}
         >
-          {JSON.stringify(insect, null, 2)}
+          {JSON.stringify(insectName, null, 2)}
         </div>
       ))}
     </div>

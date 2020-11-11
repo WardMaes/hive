@@ -1,4 +1,4 @@
-import { HexCoord } from '../lib/hex'
+import { haveSameCubeCoordinates, HexCoord } from '../lib/hex'
 import { Cell as CellType } from '../lib/game'
 import Cell from './Cell'
 import { useContext } from 'react'
@@ -11,6 +11,7 @@ type BoardCoordinate = {
 
 type BoardProps = {
   cells: CellType[]
+  selectableCells: CellType[]
 }
 
 const convertCellToGridLocation = (
@@ -24,19 +25,8 @@ const convertCellToGridLocation = (
   }
 }
 
-const Board = () => {
+const Board = ({ cells, selectableCells }: BoardProps) => {
   const [state, send] = useContext(gameContext)
-  const occupiedCells = state.context.cellsOnBoard!
-  const isPlacing = state.matches({ playing: 'prepareToPlace' })
-  const placeDestinationCells: CellType[] = isPlacing
-    ? state.context.validPlacementCoords!.map((hexCoord) => {
-        return {
-          coord: hexCoord,
-          pieces: [],
-        }
-      })
-    : []
-  const cells = [...occupiedCells, ...placeDestinationCells]
 
   // Calculating properties to calculate size of board as a grid and to map coordinates
   const minXCoordinate = cells.reduce(
@@ -60,7 +50,7 @@ const Board = () => {
         gridTemplateColumns: `repeat(${totalCols}, 1fr 2fr) 1fr`,
       }}
     >
-      {occupiedCells.map((cell) => {
+      {cells.map((cell) => {
         const { row, col } = convertCellToGridLocation(
           cell.coord,
           minXCoordinate,
@@ -71,6 +61,11 @@ const Board = () => {
 
         return (
           <Cell
+            selectable={
+              state.context.selectableCells.findIndex((selecCell) =>
+                haveSameCubeCoordinates(cell.coord, selecCell.coord)
+              ) !== -1
+            }
             cell={cell}
             key={`${cell.coord.x}-${cell.coord.y}-${cell.coord.z}`}
             gridColumnStart={gridColumnStart}
@@ -78,28 +73,6 @@ const Board = () => {
           />
         )
       })}
-      {(() => {
-        if (isPlacing) {
-          return placeDestinationCells.map((cell) => {
-            const { row, col } = convertCellToGridLocation(
-              cell.coord,
-              minXCoordinate,
-              minYZCoordinate
-            )
-            const gridColumnStart = 1 + col * 2
-            const gridRowStart = row + 1
-
-            return (
-              <Cell
-                cell={cell}
-                key={`${cell.coord.x}-${cell.coord.y}-${cell.coord.z}`}
-                gridColumnStart={gridColumnStart}
-                gridRowStart={gridRowStart}
-              />
-            )
-          })
-        }
-      })()}
     </div>
   )
 }

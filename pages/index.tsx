@@ -22,11 +22,14 @@ export default function Home() {
         {gameState.matches('playing') && (
           <div className="game" style={{ width: '100%' }}>
             <div className="board-wrapper">
-              <Board />
+              <Board
+                cells={gameState.context.cells}
+                selectableCells={gameState.context.selectableCells}
+              />
             </div>
             <div className="insect-selector">
               <InsectSelector
-                insects={gameState.context.unplacedInsectsPlayer1!}
+                insects={gameState.context.unplayedInsectsPlayer1}
               />
             </div>
           </div>
