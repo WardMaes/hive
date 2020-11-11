@@ -1,29 +1,60 @@
 // @ts-ignore : typings don't exist for this package
 import Peer from 'simple-peerjs'
+import { Context } from '../machines/types'
 
-// TODO: remove all 'any' types
+type PeerType = {
+  id: Promise<string>
+  on: Function
+  connect: Function
+  send: Function
+  peer?: ConnectionType
+}
 
-export async function createRoom() {
-  const peer = new Peer({
+type ConnectionType = {
+  peerId: string
+  peer: PeerType
+  send: Function
+}
+
+type DataType = {}
+
+let peer1: PeerType
+let peer2: ConnectionType
+
+export async function createRoom(callback: Function) {
+  console.log('creating room')
+  peer1 = new Peer({
     host: 'peer-connection.herokuapp.com',
     port: 80,
     path: '/peerjs/hive',
     initiator: true,
   })
 
-  const x = await peer.id
-  console.log('id', x)
+  console.log('peer1', peer1)
 
-  peer.on('connect', function (conn: any) {
-    console.log('Peer connected:', conn.peerId)
-    conn.peer.on('data', (data: any) => {
-      console.log(data.toString())
-      conn.peer.send('hi you 2')
+  const id = await peer1.id
+
+  peer1.on('connect', function (connection: ConnectionType) {
+    console.log('Peer connectionected:', connection.peerId)
+    peer2 = connection
+
+    connection.peer.on('data', (data: DataType) => {
+      // connection.peer.send(JSON.stringify({ hi2: 'hi you 2' }))
+
+      const parsed = JSON.parse(data.toString())
+      console.log('parsed', parsed)
+
+      if (parsed.type === 'sync') {
+        // send SYNC event to game machine
+        callback({ type: 'SYNC', state: parsed.data })
+      }
     })
   })
+
+  return id
 }
 
-export async function joinRoom(roomId: string) {
+export async function joinRoom(roomId: string, callback: Function) {
   console.log('joining room', roomId)
   const peer = new Peer({
     host: 'peer-connection.herokuapp.com',
@@ -32,13 +63,50 @@ export async function joinRoom(roomId: string) {
     initiator: false,
   })
 
-  const id = await peer.id
+  // const id = await peer.id
   const x2 = await peer.connect(roomId, {})
-  console.log('id 2', id)
 
-  x2.peer.send('hi')
+  peer2 = x2
+  // x2.peer.send(JSON.stringify({ hi: 'hi' }))
 
-  x2.peer.on('data', (data: any) => {
-    console.log('data in 2', data.toString())
+  x2.peer.on('data', (data: DataType) => {
+    const parsed = JSON.parse(data.toString())
+    console.log('parsed2', parsed)
+
+    if (parsed.type === 'sync') {
+      // send SYNC event to game machine
+      callback({ type: 'SYNC', state: parsed.data })
+    }
   })
 }
+
+export async function sync(context: Context) {
+  console.log('syncing')
+  // user is host
+  if (context.roomId && peer1 && peer1.peer) {
+    console.log('sending to 2')
+    peer1.peer.send(
+      JSON.stringify({
+        type: 'sync',
+        data: context,
+      })
+    )
+  } else if (peer2 && peer2.peer) {
+    // user is joiner
+    console.log('sending to 1')
+    peer2.peer.send(
+      JSON.stringify({
+        type: 'sync',
+        data: context,
+      })
+    )
+  }
+}
+
+// function sendToHost(dataToSend)
+
+// function sendToJoiners(dataToSend)
+
+// function createRoom(): connectionId1
+
+// function joinRoom(connectionId1): connectoinId2

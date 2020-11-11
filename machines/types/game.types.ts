@@ -15,6 +15,8 @@ export interface GameContext {
   turn: number
   unplayedInsectsPlayer1: PlayerHand
   unplayedInsectsPlayer2: PlayerHand
+  roomId: string
+  playerId: number
 }
 
 /* 
@@ -25,3 +27,4 @@ export type GameEvent =
   | { type: 'TURN.OVER' }
   | { type: 'GAME.JOIN'; code: string }
   | { type: 'GAME.CREATE' }
+  | { type: 'SYNC'; state: GameContext }

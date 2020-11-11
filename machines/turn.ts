@@ -11,6 +11,7 @@ import {
 import { Context, Event } from './types'
 import { TurnContext } from './types/turn.types'
 import { InsectName } from '../lib/insect'
+import { sync } from '../lib/p2p'
 
 export interface TurnStateSchema {
   initial: 'selecting'
@@ -103,6 +104,7 @@ export const turnMachine: TurnStateSchema = {
         assign<Context, Event>({
           placementCells: () => [],
         }),
+        'sync',
       ],
       always: [{ target: 'finish' }],
       // after: {
@@ -112,9 +114,12 @@ export const turnMachine: TurnStateSchema = {
     },
     moving: {
       // Animation to be played in frontend while in this state
-      entry: assign({
-        cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
-      }),
+      entry: [
+        assign({
+          cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
+        }),
+        'sync',
+      ],
       always: [{ target: 'finish' }],
       // after: {
       //   // After a 1s animation, go to finished state
@@ -130,6 +135,7 @@ export const turnMachine: TurnStateSchema = {
           selectableCells: () => [],
           cells: (context) => [...context.boardCells],
         }),
+        'sync',
       ],
       always: [{ target: '#check' }],
     },
@@ -138,6 +144,7 @@ export const turnMachine: TurnStateSchema = {
 
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
+    sync: (context) => sync(context),
     setSelectedCell: assign({
       selectedCell: (_, event) =>
         event.type === 'CELL.SELECT' ? event.cell : undefined,
@@ -196,7 +203,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
       ],
     }),
     resetSelectedUnplayedInsect: assign({
-      selectedUnplayedInsect: (context) => undefined,
+      selectedUnplayedInsect: (_) => undefined,
     }),
   },
   guards: {

@@ -27,6 +27,8 @@ const Cell = ({
   const isSelected =
     selectedCell && haveSameCubeCoordinates(selectedCell.coord, cell.coord)
   const topPiece = cell.pieces[cell.pieces.length - 1]
+  const playerToMove =
+    gameState.context.playerId === gameState.context.currentPlayer
 
   return (
     <div
@@ -41,7 +43,9 @@ const Cell = ({
         className={classNames('cell_content', {
           isSelected: false /* TODO: add cell-occupied as class if selected */,
         })}
-        onClick={() => selectable && sendToGame('CELL.SELECT', { cell })}
+        onClick={() =>
+          selectable && playerToMove && sendToGame('CELL.SELECT', { cell })
+        }
       >
         <div
           className={classNames('cell_clip ', {
@@ -56,7 +60,6 @@ const Cell = ({
                 src={`/icons/${topPiece.insect.name.toLowerCase()}.svg`}
                 unsized
                 alt={`${topPiece.insect.name}`}
-                priority
               />
             </div>
           ) : (

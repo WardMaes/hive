@@ -14,8 +14,9 @@ import { GameContext } from './types/game.types'
 
 export interface Schema {
   states: {
-    // initializing: {}
     menu: {}
+    joining: {}
+    creating: {}
     playing: TurnStateSchema
     checkGameFinished: {}
     alternating: {}
@@ -30,6 +31,8 @@ const gameMachineInitialContext: GameContext = {
   turn: 1,
   unplayedInsectsPlayer1: getStartInsectsPlayer(),
   unplayedInsectsPlayer2: getStartInsectsPlayer(),
+  roomId: '',
+  playerId: 1,
 }
 
 const gameMachineSansOptions = Machine<Context, Schema, Event>({
@@ -39,12 +42,39 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     menu: {
       on: {
         'GAME.JOIN': {
-          target: 'playing', // TODO: go to /rooms/[roomId]
-          actions: ['joinRoom'],
+          target: 'joining', // TODO: go to /rooms/[roomId]
         },
         'GAME.CREATE': {
-          target: 'playing', // TODO: go to /rooms/[roomId]
-          actions: ['createRoom'],
+          target: 'creating', // TODO: go to /rooms/[roomId]
+        },
+      },
+    },
+    joining: {
+      invoke: {
+        id: 'joinRoom',
+        src: (_, event) => (callback) => {
+          if (event.type !== 'GAME.JOIN') {
+            return
+          }
+          return joinRoom(event.code, callback)
+        },
+        onDone: {
+          target: 'playing',
+          actions: assign({
+            playerId: (_) => 2,
+          }),
+        },
+      },
+    },
+    creating: {
+      invoke: {
+        id: 'createRoom',
+        src: (_) => (callback) => {
+          return createRoom(callback)
+        },
+        onDone: {
+          target: 'playing',
+          actions: assign({ roomId: (_, event) => event.data }),
         },
       },
     },
@@ -83,21 +113,22 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     },
     gameOver: {},
   },
+  on: {
+    SYNC: {
+      actions: [
+        () => console.log('SYNC'),
+        assign({
+          boardCells: (_, event) => event.state.boardCells,
+          cells: (_, event) => event.state.cells,
+          currentPlayer: (_, event) => event.state.currentPlayer,
+        }),
+      ],
+    },
+  },
 })
 
 const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
-  actions: {
-    createRoom: () => {
-      // Create new room, with user as host
-      createRoom()
-    },
-    joinRoom: (_, event) => {
-      if (event.type !== 'GAME.JOIN') {
-        return
-      }
-      joinRoom(event.code)
-    },
-  },
+  actions: {},
   guards: {
     isGameOver: () => {
       // TODO: isGameOver(context.boardCells)

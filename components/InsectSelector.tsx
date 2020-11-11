@@ -14,27 +14,28 @@ type InsectSelectorProps = {
 const InsectSelector = ({ insects }: InsectSelectorProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
-  console.log(
-    gameState.context.unplayedInsectsPlayer1,
-    gameState.context.unplayedInsectsPlayer2
-  )
-
   let individualInsects: InsectName[] = []
   insects.forEach((count, insectName) => {
     individualInsects = [...individualInsects, ...Array(count).fill(insectName)]
   })
 
+  const playerToMove =
+    gameState.context.playerId === gameState.context.currentPlayer
+
   return (
-    <div className="flex flex-row justify-center content-center h-full flex-wrap">
+    <div
+      className={'flex flex-row justify-center content-center h-full flex-wrap'}
+    >
       {individualInsects.map((insectName, i) => (
         <div
           className={classNames('insect', {
             insect__selected:
               gameState.context.selectedUnplayedInsect! === insectName,
+            insect__disabled: !playerToMove,
           })}
           key={i + 1}
           onClick={() => {
-            sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
+            playerToMove && sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
           }}
         >
           <Image
