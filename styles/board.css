@@ -103,3 +103,20 @@
   background-color: #edf2f7;
   border: 0;
 }
+
+.debug {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+
+  font-size: 10px;
+  z-index: 100;
+}
+
+.debug pre {
+  background-color: lightgray;
+  width: 347px;
+  height: 420px;
+  overflow: scroll;
+  resize: both;
+}

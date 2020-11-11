@@ -1,6 +1,7 @@
 import { useMachine } from '@xstate/react'
 import { NextComponentType } from 'next'
 import { AppContext, AppInitialProps, AppProps } from 'next/app'
+import Debug from '../components/Debug'
 
 import { gameContext as GameContext } from '../context/machines'
 import { gameMachine } from '../machines/game'
@@ -17,6 +18,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppProps> = ({
 
   return (
     <GameContext.Provider value={game}>
+      <Debug />
       <Component {...modifiedPageProps} />
     </GameContext.Provider>
   )
