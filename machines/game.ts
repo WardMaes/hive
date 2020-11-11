@@ -88,20 +88,19 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
 const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
     createRoom: () => {
-      // console.log('actions.createRoom', context, event)
-      // create new room, with user as host
+      // Create new room, with user as host
       createRoom()
     },
     joinRoom: (_, event) => {
-      // console.log('actions.createRoom', context, event)
-      // create new room, with user as host
-      // @ts-ignore
-      joinRoom(event.code || 'abc')
+      if (event.type !== 'GAME.JOIN') {
+        return
+      }
+      joinRoom(event.code)
     },
   },
   guards: {
     isGameOver: () => {
-      // return isGameOver(context.boardCells)
+      // TODO: isGameOver(context.boardCells)
       return false
     },
   },

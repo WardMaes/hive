@@ -6,9 +6,9 @@ import { InsectName } from '../../lib/insect'
 */
 
 export interface TurnContext {
-  cellsPossibleDestinationsCurrentMove?: Cell[]
-  cellsAllowedToMove?: Cell[]
-  insectsAllowedToPlace?: InsectName[]
+  cellsPossibleDestinationsCurrentMove: Cell[]
+  cellsAllowedToMove: Cell[]
+  insectsAllowedToPlace: InsectName[]
   selectedUnplayedInsect?: InsectName
   selectedCell?: Cell
   placementCells?: Cell[]

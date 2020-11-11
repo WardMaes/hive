@@ -23,5 +23,5 @@ export interface GameContext {
 
 export type GameEvent =
   | { type: 'TURN.OVER' }
-  | { type: 'GAME.JOIN' }
+  | { type: 'GAME.JOIN'; code: string }
   | { type: 'GAME.CREATE' }

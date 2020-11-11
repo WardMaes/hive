@@ -9,7 +9,8 @@ import {
   Cell,
 } from '../lib/game'
 import { Context, Event } from './types'
-import { TurnContext, TurnEvent } from './types/turn.types'
+import { TurnContext } from './types/turn.types'
+import { InsectName } from '../lib/insect'
 
 export interface TurnStateSchema {
   initial: 'selecting'
@@ -22,7 +23,13 @@ export interface TurnStateSchema {
 }
 
 export const turnMachineInitialContext: TurnContext = {
-  selectableCells: [],
+  selectableCells: [] as Cell[],
+  cellsPossibleDestinationsCurrentMove: [],
+  cellsAllowedToMove: [],
+  insectsAllowedToPlace: [],
+  selectedUnplayedInsect: undefined,
+  selectedCell: undefined,
+  placementCells: undefined,
 }
 
 export const turnMachine: TurnStateSchema = {
@@ -44,10 +51,12 @@ export const turnMachine: TurnStateSchema = {
     },
     selectedToPlace: {
       entry: [
-        assign<Context, TurnEvent>({
-          selectedUnplayedInsect: (_: Context, event: TurnEvent) =>
-            // @ts-ignore TODO
-            event.insectName,
+        assign<Context, Event>({
+          selectedUnplayedInsect: (_, event: Event) => {
+            return event.type === 'UNPLAYEDPIECE.SELECT'
+              ? event.insectName
+              : InsectName.ant
+          },
         }),
         'createAndSetPlacementCells',
         assign<Context, Event>({
@@ -112,13 +121,11 @@ export const turnMachine: TurnStateSchema = {
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
     setSelectedCell: assign({
-      // @ts-ignore TODO
-      selectedCell: (_, event) => event.cell,
+      selectedCell: (_, event) =>
+        event.type === 'CELL.SELECT' ? event.cell : undefined,
     }),
-    // @ts-ignore TODO
     setCellsAllowedToMove: assign({
-      // cellsAllowedToMove: (context) => context.game.
-      cellsAllowedToMove: () => [],
+      // cellsAllowedToMove: () => [] as Cell[],
     }),
     setInsectsAllowedToPlace: assign({
       insectsAllowedToPlace: (context) =>
@@ -178,12 +185,15 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
       return false
     },
     toggledUnplayedInsectSelection: (context, event) => {
-      // @ts-ignore TODO
-      return event.insectName === context.selectedUnplayedInsect
+      return event.type === 'UNPLAYEDPIECE.SELECT'
+        ? event.insectName === context.selectedUnplayedInsect
+        : false
     },
     selectedCellIsTempPlacementCell: (context, event) => {
-      // @ts-ignore TODO
-      const selectedCell: Cell = event.cell
+      if (event.type !== 'CELL.SELECT') {
+        return false
+      }
+      const selectedCell = event.cell
       return (
         // TODO would be nicer to create game method to check equivalence of cells rather than comparing with hex method of coordinates
         context.placementCells?.findIndex((cell) =>
