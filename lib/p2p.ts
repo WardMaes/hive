@@ -29,9 +29,34 @@ export async function createRoom(callback: Function) {
     port: 443,
     path: '/peerjs/hive',
     initiator: true,
+    simplePeer: {
+      config: {
+        iceServers: [
+          {
+            urls: 'turn:relay.backups.cz',
+            credential: 'webrtc',
+            username: 'webrtc',
+          },
+          {
+            urls: 'turn:numb.viagenie.ca',
+            username: 'nofaxe3842@wgraj.com',
+            credential: 'nofaxe3842@wgraj.com',
+          },
+          {
+            urls: 'turn:relay.backups.cz?transport=tcp',
+            credential: 'webrtc',
+            username: 'webrtc',
+          },
+        ],
+      },
+    },
   })
 
   console.log('peer1', peer1)
+
+  peer1.on('error', function (err: any) {
+    console.log('Peer 1 error', err)
+  })
 
   const id = await peer1.id
 
@@ -63,6 +88,31 @@ export async function joinRoom(roomId: string, callback: Function) {
     port: 443,
     path: '/peerjs/hive',
     initiator: false,
+    simplePeer: {
+      config: {
+        iceServers: [
+          {
+            urls: 'turn:relay.backups.cz',
+            credential: 'webrtc',
+            username: 'webrtc',
+          },
+          {
+            urls: 'turn:relay.backups.cz?transport=tcp',
+            credential: 'webrtc',
+            username: 'webrtc',
+          },
+          {
+            urls: 'turn:numb.viagenie.ca',
+            username: 'nofaxe3842@wgraj.com',
+            credential: 'nofaxe3842@wgraj.com',
+          },
+        ],
+      },
+    },
+  })
+
+  peer.on('error', function (err: any) {
+    console.log('Peer 2 error', err)
   })
 
   // const id = await peer.id
