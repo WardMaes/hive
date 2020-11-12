@@ -122,6 +122,7 @@ export const Beetle: Insect = {
     let moves: Move[] = []
     // Moving on the same level
     const level = pieces.length - 1
+    const lookUp = hexCoordsToLookupTable(boardCells.map((cell) => cell.coord))
     if (level == 0) {
       // Bottom level logic
       const level0Moves = walkPerimeter(
@@ -132,36 +133,25 @@ export const Beetle: Insect = {
       ).filter((move) => move.length == 1)
       moves = [...moves, ...level0Moves]
     } else {
-      // Logic for moving on top of hive
-      const occupiedCoordinatesLevelBelow = boardCells
-        .filter(({ pieces }) => pieces.length == level - 1)
-        .map((cell) => cell.coord)
-      const lookUp = hexCoordsToLookupTable<null>(occupiedCoordinatesLevelBelow)
-      // TODO extract to lib/hex and allow for any distance (will be handy for mosquito)
-      const validDestinations = getNeighbours(coord).filter((neighCoord) =>
-        checkOccupationInLookupTable(neighCoord, lookUp)
+      // Allowing to dive to neighbor cell with no pieces next to the hive
+      const emptyNeighbors = getNeighbours(coord).filter(
+        (coord) => !checkOccupationInLookupTable(coord, lookUp)
       )
-      const validMoves: Move[] = validDestinations.map(
-        (dest) =>
+      const divingMoves = emptyNeighbors.map(
+        (neighCoord) =>
           <Move>{
-            destination: dest,
+            destination: neighCoord,
             length: 1,
-            path: [coord, dest],
+            path: [coord, neighCoord],
           }
       )
-      moves = [...moves, ...validMoves]
+      moves = [...moves, ...divingMoves]
     }
-    // Logic for either jumping or diving on a neighbor
-    const heightLookUp = hexCoordsToLookupTable<number>(
-      boardCells.map(({ coord }) => coord),
-      boardCells.map(({ pieces }) => pieces.length)
+    // Logic for either moving on or jumping on top of hive
+    const occupNeighbros = getNeighbours(coord).filter((coord) =>
+      checkOccupationInLookupTable(coord, lookUp)
     )
-    const neighborsWithHeightDifferenceOfOne = getNeighbours(coord).filter(
-      ({ x, y, z }) =>
-        checkOccupationInLookupTable({ x, y, z }, heightLookUp) &&
-        Math.abs(heightLookUp[x]![y]![z]![0] - level) == 1
-    )
-    const jumpDiveMoves = neighborsWithHeightDifferenceOfOne.map(
+    const onTopOfHiveOrJumpingMoves = occupNeighbros.map(
       (destCoord) =>
         <Move>{
           destination: destCoord,
@@ -169,7 +159,7 @@ export const Beetle: Insect = {
           path: [coord, destCoord],
         }
     )
-    moves = [...moves, ...jumpDiveMoves]
+    moves = [...moves, ...onTopOfHiveOrJumpingMoves]
     return moves
   },
 }
