@@ -1,4 +1,3 @@
-// import { Cell } from '../machines/game'
 import {
   HexCoord,
   Move,
@@ -15,10 +14,21 @@ import { getInsectByName, InsectName } from './insect'
 export type Board = {
   cells: Cell[]
 }
+
+export enum CellStateEnum {
+  SELECTABLE,
+  SELECTED,
+  TEMPORARY,
+  DESTINATION,
+  // TODO either add state which sets path of move or add list to cell with moves of which the cell is a part of the path and do logic in frontend
+  // PARTOFPATH,
+}
+
 export type Cell = {
   coord: HexCoord
   // Convention is the higher the index of the piece in the array, the higher it is in the stack
   pieces: Piece[]
+  state: CellStateEnum[]
 }
 export type Piece = {
   ofPlayer: number
@@ -45,6 +55,31 @@ const insectsForExpansion = {
   General
 */
 
+export const addCellStates = (states: CellStateEnum[], cell: Cell): Cell => {
+  states.forEach((state) => {
+    if (!cell.state.includes(state)) {
+      cell.state = [...cell.state, state]
+    }
+  })
+  return cell
+}
+
+export const removeCellStates = (states: CellStateEnum[], cell: Cell): Cell => {
+  cell.state = cell.state.filter((state) => !states.includes(state))
+  return cell
+}
+
+export const removeCellStatesFromCells = (
+  states: CellStateEnum[],
+  cells: Cell[]
+): Cell[] => {
+  return cells.map((cell) => removeCellStates(states, cell))
+}
+
+export const filterTempCells = (cells: Cell[]): Cell[] => {
+  return cells.filter((cell) => cell.state.includes(CellStateEnum.TEMPORARY))
+}
+
 export const createCellWithInsect = (
   hexCoord: HexCoord,
   insectName: InsectName,
@@ -59,13 +94,29 @@ export const createCellWithInsect = (
         ofPlayer: player,
       },
     ],
+    state: [],
   }
+}
+
+// Returns empty cells for each coordinate that was present in other cells
+export const createTempEmptyCellsForMissingCoords = (
+  hexCoordinates: HexCoord[],
+  presentCells: Cell[]
+): Cell[] => {
+  const missingCoords = hexCoordinates.filter(
+    (coord) =>
+      presentCells.findIndex((cell) =>
+        haveSameCubeCoordinates(cell.coord, coord)
+      ) === -1
+  )
+  return missingCoords.map((coord) => createTempEmptyCell(coord))
 }
 
 export const createTempEmptyCell = (hexCoord: HexCoord): Cell => {
   return {
     coord: hexCoord,
     pieces: [],
+    state: [CellStateEnum.TEMPORARY],
   }
 }
 

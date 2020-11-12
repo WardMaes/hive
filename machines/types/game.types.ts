@@ -1,16 +1,28 @@
+import { TurnStateSchema } from './turn.types'
 import { Cell, PlayerHand } from '../../lib/game'
 // import {  } from "../../lib/game";
+
+/* 
+  Schema
+*/
+
+export interface GameStateSchema {
+  states: {
+    // initializing: {}
+    menu: {}
+    playing: TurnStateSchema
+    checkGameFinished: {}
+    alternating: {}
+    gameOver: {}
+  }
+}
 
 /* 
     Context
 */
 
 export interface GameContext {
-  // TODO dislike the 2 seperate cells collections, possible alternative
-  // Specific for frontend, all cells to render
   cells: Cell[]
-  // For internal use, keeps track of all permanent cells on board which contain pieces
-  boardCells: Cell[]
   currentPlayer: number
   turn: number
   unplayedInsectsPlayer1: PlayerHand

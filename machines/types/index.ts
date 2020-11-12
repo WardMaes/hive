@@ -1,5 +1,7 @@
 import { TurnContext, TurnEvent } from './turn.types'
-import { GameContext, GameEvent } from './game.types'
+import { GameContext, GameEvent, GameStateSchema } from './game.types'
+
+export type Schema = GameStateSchema
 
 export type Context = GameContext & TurnContext
 

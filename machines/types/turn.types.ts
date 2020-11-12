@@ -3,19 +3,36 @@ import { Move } from '../../lib/hex'
 import { InsectName } from '../../lib/insect'
 
 /* 
+  Schema
+*/
+
+export interface TurnStateSchema {
+  initial: 'selecting'
+  states: {
+    selecting: {}
+    selectedToPlace: {}
+    selectedToMove: {}
+    placing: {}
+    moving: {}
+    finish: {}
+  }
+}
+
+/* 
     Context
 */
 
 export interface TurnContext {
-  validMoves: Move[]
-  cellsAllowedToMove: Cell[]
-  insectsAllowedToPlace: InsectName[]
+  selectableCells: Cell[]
+  validMoves?: Move[]
+  cellsAllowedToMove?: Cell[]
+  insectsAllowedToPlace?: InsectName[]
   selectedUnplayedInsect?: InsectName
   selectedCell?: Cell
   // TODO Merge to validDestinaitons and add collection of newly created cells to handle the rest
   placementCells?: Cell[]
-  validDestinations: Cell[]
-  selectableCells: Cell[]
+  validDestinations?: Cell[]
+  tempCells?: Cell[]
 }
 
 /* 
@@ -23,10 +40,32 @@ export interface TurnContext {
 */
 
 export type TurnEvent =
-  // | { type: 'MOVE'; move: Move }
   | { type: 'CELL.SELECT'; cell: Cell }
   | { type: 'UNPLAYEDPIECE.SELECT'; insectName: InsectName }
-// | { type: 'MOVESELECT'; cell: Cell }
-// | { type: 'PLACE'; coord: HexCoord }
-// | { type: 'PLACESELECT'; insect: Insect }
-// | { type: 'UNSELECT' }
+
+/* 
+  State
+*/
+// TODO maybe later
+// export type TurnState =
+// | {
+//   value: 'playing.selecting'
+//   context: TurnContext & {
+//     cellsAllowedToMove: Cell[]
+//     insectsAllowedToPlace: InsectName[]
+//   }
+// }
+// | {
+//   value: 'playing.selectedToPlace'
+//   context: {
+//     selectedUnplayedInsect: InsectName;
+//     validDestinations: Cell[]
+//   }
+// }
+// | {
+//   value: 'playing.selectedToMove'
+//   context: {
+//     selectedCell: Cell;
+//     validDestinations: Cell[];
+//   }
+// }

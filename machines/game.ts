@@ -1,10 +1,9 @@
 import { Machine, assign, MachineOptions } from 'xstate'
 import { getStartInsectsPlayer } from '../lib/game'
 
-import { Context, Event } from './types'
+import { Context, Event, Schema } from './types'
 import {
   turnMachine,
-  TurnStateSchema,
   turnMachineConfig,
   turnMachineInitialContext,
 } from './turn'
@@ -12,20 +11,8 @@ import { createRoom, joinRoom } from '../lib/p2p'
 import { mergeMachineOptions } from './helper'
 import { GameContext } from './types/game.types'
 
-export interface Schema {
-  states: {
-    // initializing: {}
-    menu: {}
-    playing: TurnStateSchema
-    checkGameFinished: {}
-    alternating: {}
-    gameOver: {}
-  }
-}
-
 const gameMachineInitialContext: GameContext = {
   cells: [],
-  boardCells: [],
   currentPlayer: 1,
   turn: 1,
   unplayedInsectsPlayer1: getStartInsectsPlayer(),

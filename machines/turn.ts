@@ -1,37 +1,31 @@
 import { assign, MachineOptions } from 'xstate'
 import { haveSameCubeCoordinates } from '../lib/hex'
 import {
-  Cell,
+  CellStateEnum,
+  addCellStates,
+  createTempEmptyCellsForMissingCoords,
   createTempEmptyCell,
-  createCellWithInsect,
   filterValidInsectsToPlace,
   getValidCellsToMove,
   getValidMovesForCell,
   getValidPlacementCoordinates,
+  removeCellStates,
   removeInsectFromUnplayed,
+  getTopPieceOfCell,
+  filterTempCells,
+  removeCellStatesFromCells,
 } from '../lib/game'
 import { Context, Event } from './types'
-import { TurnContext } from './types/turn.types'
-
-export interface TurnStateSchema {
-  initial: 'selecting'
-  states: {
-    selecting: {}
-    selectedToPlace: {}
-    selectedToMove: {}
-    placing: {}
-    moving: {}
-    finish: {}
-  }
-}
+import { TurnContext, TurnStateSchema } from './types/turn.types'
 
 export const turnMachineInitialContext: TurnContext = {
-  selectableCells: [] as Cell[],
+  selectableCells: [],
   cellsAllowedToMove: [],
   insectsAllowedToPlace: [],
   selectedUnplayedInsect: undefined,
   selectedCell: undefined,
   placementCells: undefined,
+  tempCells: [],
   validDestinations: [],
   validMoves: [],
 }
@@ -42,12 +36,10 @@ export const turnMachine: TurnStateSchema = {
     selecting: {
       // Set which pieces can be moved and which insects can be placed so user can select one
       entry: [
+        'filterEmptyTempCells',
+        'removeDestinationStates',
         'setCellsAllowedToMove',
         'setInsectsAllowedToPlace',
-        assign<Context, Event>({
-          cells: (context) => [...context.boardCells],
-          selectableCells: (context) => context.cellsAllowedToMove!,
-        }),
       ],
       on: {
         'UNPLAYEDPIECE.SELECT': { target: 'selectedToPlace' },
@@ -56,39 +48,27 @@ export const turnMachine: TurnStateSchema = {
     },
     selectedToPlace: {
       entry: [
-        assign<Context, Event>({
-          selectedUnplayedInsect: (_, event: Event) => {
-            return event.type === 'UNPLAYEDPIECE.SELECT'
-              ? event.insectName
-              : undefined
-          },
-        }),
-        'createAndSetPlacementCells',
-        assign<Context, Event>({
-          cells: (context) => [
-            ...context.boardCells,
-            ...context.placementCells!,
-          ],
-          selectableCells: (context) => [
-            ...context.selectableCells,
-            ...context.placementCells!,
-          ],
-        }),
+        'filterEmptyTempCells',
+        'removeDestinationStates',
+        'setSelectedUnplayedInsect',
+        'setPlacementCells',
       ],
       on: {
         'CELL.SELECT': [
           // Selected cell was a temporary cell corresponding to a placement location
           {
             target: 'placing',
-            cond: 'selectedCellIsTempPlacementCell',
+            cond: 'selectedCellIsDestination',
           },
           // Otherwise was an already placed cell and player wants to exit placement and enter movement with that piece
-          // { target: "selectedToMove"}
+          {
+            target: 'selectedToMove',
+          },
         ],
         'UNPLAYEDPIECE.SELECT': [
-          // Check if selected piece was toggled
           {
             target: 'selecting',
+            // Check if selected piece was toggled
             cond: 'toggledUnplayedInsectSelection',
             actions: ['resetSelectedUnplayedInsect'],
           },
@@ -99,50 +79,22 @@ export const turnMachine: TurnStateSchema = {
     },
     selectedToMove: {
       entry: [
+        'filterEmptyTempCells',
+        'removeDestinationStates',
         'setSelectedCell',
-        'generateAndSetPossibleMoves',
-        assign<Context, Event>({
-          cells: (context) => [
-            ...context.validMoves.map((move) =>
-              createTempEmptyCell(move.destination)
-            ),
-            ...context.boardCells,
-          ],
-        }),
-      ],
-      actions: [
-        ,// Generate possible moves
-      // Set destinations on context in way which UI can interact with it
+        'setDestinationsOfMoves',
       ],
       on: {
         'CELL.SELECT': [
           // Select a move destination cell
           {
             target: 'moving',
-            cond: (context: Context, event: Event) => {
-              if (event.type === 'CELL.SELECT') {
-                context.validDestinations.findIndex((destCell) =>
-                  haveSameCubeCoordinates(destCell.coord, event.cell.coord)
-                )
-              }
-              return false
-            },
+            cond: 'selectedCellIsDestination',
           },
           // Toggle already selected cell
           {
             target: 'selecting',
-            cond: (context: Context, event: Event) => {
-              if (event.type === 'CELL.SELECT') {
-                return (
-                  context.selectedCell &&
-                  haveSameCubeCoordinates(
-                    context.selectedCell.coord,
-                    event.cell.coord
-                  )
-                )
-              }
-              return false
-            },
+            cond: 'toggledCellSelection',
             actions: ['resetSelectedCell'],
           },
           // Select another cell which is not the selected cell or one of its destinations
@@ -156,13 +108,7 @@ export const turnMachine: TurnStateSchema = {
       },
     },
     placing: {
-      entry: [
-        'setSelectedCell',
-        'placeInsectAndUpdateUnplaced',
-        assign<Context, Event>({
-          placementCells: () => [],
-        }),
-      ],
+      entry: ['moveSelectedToDestination'],
       always: [{ target: 'finish' }],
       // after: {
       //   // After a 1s animation, go to finished state
@@ -171,9 +117,7 @@ export const turnMachine: TurnStateSchema = {
     },
     moving: {
       // Animation to be played in frontend while in this state
-      entry: assign({
-        cellsPossibleDestinationsCurrentMove: (_) => [], // Reset possible destinations (not sure if needed)
-      }),
+      entry: ['moveSelectedToDestination'],
       always: [{ target: 'finish' }],
       // after: {
       //   // After a 1s animation, go to finished state
@@ -181,15 +125,15 @@ export const turnMachine: TurnStateSchema = {
       // },
     },
     finish: {
-      entry: [
-        // Cleanup
-        assign<Context, Event>({
-          selectedCell: () => undefined,
-          selectedUnplayedInsect: () => undefined,
-          selectableCells: () => [],
-          cells: (context) => [...context.boardCells],
-        }),
-      ],
+      // entry: [
+      //   // Cleanup
+      //   assign<Context, Event>({
+      //     selectedCell: () => undefined,
+      //     selectedUnplayedInsect: () => undefined,
+      //     selectableCells: () => [],
+      //     cells: (context) => [...context.boardCells],
+      //   }),
+      // ],
       always: [{ target: '#check' }],
     },
   },
@@ -197,30 +141,105 @@ export const turnMachine: TurnStateSchema = {
 
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
-    generateAndSetPossibleMoves: assign({
-      validMoves: (context) => {
-        console.log('enter')
-        const selectedCell = context.selectedCell!
-        const boardCells = context.boardCells
-
-        const moves = getValidMovesForCell(selectedCell, boardCells)
-        console.log(moves)
-        return moves
+    resetSelectedCell: assign({
+      cells: (context) =>
+        removeCellStatesFromCells([CellStateEnum.SELECTED], context.cells),
+    }),
+    removeDestinationStates: assign({
+      cells: (context) =>
+        removeCellStatesFromCells([CellStateEnum.DESTINATION], context.cells),
+    }),
+    filterEmptyTempCells: assign({
+      cells: (context) => {
+        // Remove TEMP state if it has pieces
+        const cells = context.cells.map((cell) => {
+          if (
+            cell.state.includes(CellStateEnum.TEMPORARY) &&
+            cell.pieces.length > 0
+          ) {
+            return removeCellStates([CellStateEnum.TEMPORARY], cell)
+          }
+          return cell
+        })
+        return filterTempCells(cells)
+      },
+    }),
+    setDestinationsOfMoves: assign({
+      cells: (context, event) => {
+        if (event.type === 'CELL.SELECT') {
+          const selectedCell = event.cell
+          const moves = getValidMovesForCell(selectedCell, context.cells)
+          const destinations = moves.map((move) => move.destination)
+          const existingCells = context.cells.map((cell) => {
+            const isDestination = destinations.findIndex((destCoord) =>
+              haveSameCubeCoordinates(destCoord, cell.coord)
+            )
+            if (!isDestination) {
+              cell = removeCellStates([CellStateEnum.DESTINATION], cell)
+            } else {
+              cell = addCellStates([CellStateEnum.DESTINATION], cell)
+            }
+            return cell
+          })
+          const newTempCells = createTempEmptyCellsForMissingCoords(
+            destinations,
+            existingCells
+          ).map((cell) => addCellStates([CellStateEnum.DESTINATION], cell))
+          return [...existingCells, ...newTempCells]
+        }
+        return context.cells
       },
     }),
     setSelectedCell: assign({
-      selectedCell: (_, event) =>
-        event.type === 'CELL.SELECT' ? event.cell : undefined,
+      cells: (context, event) => {
+        if (event.type === 'CELL.SELECT') {
+          const selectedCell = event.cell
+          return context.cells.map((cell) => {
+            const matchesSelectedCell = haveSameCubeCoordinates(
+              selectedCell.coord,
+              cell.coord
+            )
+            if (cell.state.includes(CellStateEnum.SELECTED)) {
+              if (matchesSelectedCell) {
+                cell.state = cell.state.filter(
+                  (el) => el === CellStateEnum.SELECTED
+                )
+              }
+            } else if (matchesSelectedCell) {
+              cell.state = [...cell.state, CellStateEnum.SELECTED]
+            }
+            return cell
+          })
+        }
+        return context.cells
+      },
+    }),
+    setSelectedUnplayedInsect: assign({
+      selectedUnplayedInsect: (_, event: Event) => {
+        return event.type === 'UNPLAYEDPIECE.SELECT'
+          ? event.insectName
+          : undefined
+      },
     }),
     setCellsAllowedToMove: assign({
-      cellsAllowedToMove: (context) =>
-        getValidCellsToMove(
+      cells: (context) => {
+        const moveableCells = getValidCellsToMove(
           context.currentPlayer,
           context.currentPlayer === 1
             ? context.unplayedInsectsPlayer1
             : context.unplayedInsectsPlayer2,
-          context.boardCells
-        ),
+          context.cells
+        )
+        return context.cells.map((cell) => {
+          const isMovable = moveableCells.findIndex((moveCell) =>
+            haveSameCubeCoordinates(moveCell.coord, cell.coord)
+          )
+          if (isMovable) {
+            cell.state.push(CellStateEnum.SELECTABLE)
+          }
+          return cell
+        })
+      },
     }),
     setInsectsAllowedToPlace: assign({
       insectsAllowedToPlace: (context) =>
@@ -231,15 +250,41 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
           context.turn
         ),
     }),
-    createAndSetPlacementCells: assign({
-      placementCells: (context) => {
+    setPlacementCells: assign({
+      cells: (context) => {
         const validPlacementCoords = getValidPlacementCoordinates(
-          context.boardCells,
+          context.cells,
           context.currentPlayer
         )
-        return validPlacementCoords.map((hexCoord) =>
-          createTempEmptyCell(hexCoord)
-        )
+        return validPlacementCoords.map((coord) => {
+          const tempCell = createTempEmptyCell(coord)
+          tempCell.state = [...tempCell.state, CellStateEnum.DESTINATION]
+          return tempCell
+        })
+      },
+    }),
+    moveSelectedToDestination: assign({
+      cells: (context, event) => {
+        if (event.type === 'CELL.SELECT') {
+          const destinationCell = event.cell
+          const selectedCell = context.cells.find((cell) =>
+            cell.state.includes(CellStateEnum.SELECTED)
+          )!
+          // TODO Throw error if no cell is selected cause that should be impossible
+          const otherCells = context.cells.filter(
+            (cell) =>
+              [destinationCell, selectedCell].findIndex((otherCell) =>
+                haveSameCubeCoordinates(otherCell.coord, cell.coord)
+              ) === -1
+          )
+
+          const movingPiece = getTopPieceOfCell(selectedCell)!
+          selectedCell.pieces = selectedCell.pieces.slice(0, -1)
+          destinationCell.pieces.push(movingPiece)
+
+          return [...otherCells, selectedCell, destinationCell]
+        }
+        return context.cells
       },
     }),
     placeInsectAndUpdateUnplaced: assign({
@@ -263,17 +308,23 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
           return context.unplayedInsectsPlayer2
         }
       },
-      boardCells: (context) => [
-        ...context.boardCells,
-        createCellWithInsect(
-          context.selectedCell!.coord,
-          context.selectedUnplayedInsect!,
-          context.currentPlayer
-        ),
-      ],
-    }),
-    resetSelectedCell: assign({
-      selectedCell: (_) => undefined,
+      cells: (context, event) => {
+        if (event.type === 'CELL.SELECT') {
+          const destination = event.cell
+          const selectedInsect = context.selectedUnplayedInsect
+          return context.cells.map((cell) => {
+            if (haveSameCubeCoordinates(cell.coord, destination.coord)) {
+              cell.pieces.push({
+                insectName: selectedInsect!,
+                ofPlayer: context.currentPlayer,
+              })
+              return cell
+            }
+            return cell
+          })
+        }
+        return context.cells
+      },
     }),
     resetSelectedUnplayedInsect: assign({
       selectedUnplayedInsect: (_) => undefined,
@@ -281,8 +332,16 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   },
   guards: {
     // New selection is same as previous selection, indicating a toggle
-    toggledCellSelection: () => {
-      // context.selectedCell
+    toggledCellSelection: (context, event) => {
+      if (event.type === 'CELL.SELECT') {
+        const prevSelectedCell = context.cells.find((cell) =>
+          cell.state.includes(CellStateEnum.SELECTED)
+        )
+        return !!(
+          prevSelectedCell &&
+          haveSameCubeCoordinates(event.cell.coord, prevSelectedCell?.coord)
+        )
+      }
       return false
     },
     toggledUnplayedInsectSelection: (context, event) => {
@@ -290,17 +349,12 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
         ? event.insectName === context.selectedUnplayedInsect
         : false
     },
-    selectedCellIsTempPlacementCell: (context, event) => {
-      if (event.type !== 'CELL.SELECT') {
-        return false
+    selectedCellIsDestination: (context, event) => {
+      if (event.type == 'CELL.SELECT') {
+        const selectedCell = event.cell
+        return selectedCell.state.includes(CellStateEnum.DESTINATION)
       }
-      const selectedCell = event.cell
-      return (
-        // TODO would be nicer to create game method to check equivalence of cells rather than comparing with hex method of coordinates
-        context.placementCells?.findIndex((cell) =>
-          haveSameCubeCoordinates(selectedCell.coord, cell.coord)
-        ) !== -1
-      )
+      return false
     },
   },
 }
