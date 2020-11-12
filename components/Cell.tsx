@@ -30,7 +30,7 @@ const Cell = ({
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer
 
-  const isSelectable = cell.state.includes(CellStateEnum.SELECTABLE)
+  const isSelectable = cell.state.includes(CellStateEnum.MOVEABLE)
   const isDestination = cell.state.includes(CellStateEnum.DESTINATION)
 
   return (
@@ -67,7 +67,8 @@ const Cell = ({
                 src={`/icons/${topPiece.insectName.toLowerCase()}.svg`}
                 unsized
                 alt={`${topPiece.insectName}`}
-                priority
+                // TODO was set to true but generates a lot of warnings of combination of unsized. Neccesary?
+                priority={false}
               />
             </div>
           ) : (

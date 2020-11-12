@@ -12,7 +12,7 @@ describe('Game logic testing', () => {
     pieces: [],
     state: [
       CellStateEnum.DESTINATION,
-      CellStateEnum.SELECTABLE,
+      CellStateEnum.MOVEABLE,
       CellStateEnum.SELECTED,
     ],
   }
@@ -28,7 +28,7 @@ describe('Game logic testing', () => {
         ofPlayer: 1,
       },
     ],
-    state: [CellStateEnum.SELECTABLE],
+    state: [CellStateEnum.MOVEABLE],
   }
   it('should return the cell with the given states removed', () => {
     expect(
@@ -36,39 +36,37 @@ describe('Game logic testing', () => {
         [CellStateEnum.DESTINATION, CellStateEnum.SELECTED],
         cellA
       ).state
-    ).toEqual([CellStateEnum.SELECTABLE])
+    ).toEqual([CellStateEnum.MOVEABLE])
     expect(removeCellStates([CellStateEnum.TEMPORARY], cellA).state).toEqual([
       CellStateEnum.DESTINATION,
-      CellStateEnum.SELECTABLE,
+      CellStateEnum.MOVEABLE,
       CellStateEnum.SELECTED,
     ])
     expect(
       removeCellStates(
         [
           CellStateEnum.DESTINATION,
-          CellStateEnum.SELECTABLE,
+          CellStateEnum.MOVEABLE,
           CellStateEnum.SELECTED,
         ],
         cellA
       ).state
     ).toEqual([])
 
-    expect(removeCellStates([CellStateEnum.SELECTABLE], cellB).state).toEqual(
-      []
-    )
+    expect(removeCellStates([CellStateEnum.MOVEABLE], cellB).state).toEqual([])
   })
 
   it('should return the cells without the given states', () => {
     expect(
       removeCellStatesFromCells(
-        [CellStateEnum.DESTINATION, CellStateEnum.SELECTABLE],
+        [CellStateEnum.DESTINATION, CellStateEnum.MOVEABLE],
         [
           {
             coord: { x: Infinity, y: Infinity, z: Infinity },
             pieces: [],
             state: [
               CellStateEnum.DESTINATION,
-              CellStateEnum.SELECTABLE,
+              CellStateEnum.MOVEABLE,
               CellStateEnum.SELECTED,
             ],
           },
