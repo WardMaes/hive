@@ -16,6 +16,20 @@ import {
   removeCellStatesFromCells,
 } from '../lib/game'
 import { Context, Event } from './types'
+import { TurnContext } from './types/turn.types'
+import { InsectName } from '../lib/insect'
+import { sync } from '../lib/p2p'
+
+export interface TurnStateSchema {
+  initial: 'selecting'
+  states: {
+    selecting: {}
+    selectedToPlace: {}
+    placing: {}
+    moving: {}
+    finish: {}
+  }
+}
 import { TurnContext, TurnStateSchema } from './types/turn.types'
 
 export const turnMachineInitialContext: TurnContext = {
@@ -84,6 +98,7 @@ export const turnMachine: TurnStateSchema = {
         'removeDestinationStates',
         'setSelectedCell',
         'setDestinationsOfMoves',
+        'sync',
       ],
       on: {
         'CELL.SELECT': [
@@ -118,7 +133,7 @@ export const turnMachine: TurnStateSchema = {
     },
     moving: {
       // Animation to be played in frontend while in this state
-      entry: ['moveSelectedToDestination'],
+      entry: ['moveSelectedToDestination', 'sync'],
       always: [{ target: 'finish' }],
       // after: {
       //   // After a 1s animation, go to finished state
@@ -143,6 +158,7 @@ export const turnMachine: TurnStateSchema = {
               cells
             ),
         }),
+        'sync',
         (context) => {
           console.log(context)
         },
@@ -154,6 +170,7 @@ export const turnMachine: TurnStateSchema = {
 
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
+    sync: (context) => sync(context),
     removeSelectableStates: assign({
       cells: (context) =>
         removeCellStatesFromCells([CellStateEnum.SELECTABLE], context.cells),

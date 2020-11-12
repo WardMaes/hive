@@ -26,10 +26,9 @@ const Cell = ({
   const selectedCell = gameState.context.selectedCell
   const isSelected =
     selectedCell && haveSameCubeCoordinates(selectedCell.coord, cell.coord)
-  const topPiece = getTopPieceOfCell(cell)
-
-  const isSelectable = cell.state.includes(CellStateEnum.SELECTABLE)
-  const isDestination = cell.state.includes(CellStateEnum.DESTINATION)
+  const topPiece = cell.pieces[cell.pieces.length - 1]
+  const playerToMove =
+    gameState.context.playerId === gameState.context.currentPlayer
 
   return (
     <div
@@ -47,7 +46,9 @@ const Cell = ({
           isSelected: false /* TODO: add cell-occupied as class if selected */,
         })}
         onClick={() =>
-          (isSelectable || isDestination) && sendToGame('CELL.SELECT', { cell })
+          (isSelectable || isDestination) &&
+          playerToMove &&
+          sendToGame('CELL.SELECT', { cell })
         }
       >
         <div
