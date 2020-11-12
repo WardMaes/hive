@@ -8,8 +8,9 @@ import { Cell, PlayerHand } from '../../lib/game'
 
 export interface GameStateSchema {
   states: {
-    // initializing: {}
     menu: {}
+    joining: {}
+    creating: {}
     playing: TurnStateSchema
     checkGameFinished: {}
     alternating: {}

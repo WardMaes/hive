@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 
 import { gameContext } from '../context/machines'
 
@@ -8,19 +8,20 @@ import Board from '../components/Board'
 import Menu from '../components/Menu'
 
 export default function Home() {
-  const [gameState, , service] = useContext(gameContext)
+  const [gameState] = useContext(gameContext)
 
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer
 
-  useEffect(() => {
-    const subscription = service.subscribe((state) => {
-      // simple state logging
-      // console.log('in useeffect', state)
-    })
+  // TODO if unused, remove
+  // useEffect(() => {
+  //   const subscription = service.subscribe((state) => {
+  //     // simple state logging
+  //     // console.log('in useeffect', state)
+  //   })
 
-    return subscription.unsubscribe
-  }, [service]) // note: service should never change
+  //   return subscription.unsubscribe
+  // }, [service]) // note: service should never change
 
   return (
     <>

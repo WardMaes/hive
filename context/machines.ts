@@ -1,8 +1,7 @@
 import { createContext } from 'react'
 import { Interpreter, State } from 'xstate'
 
-import { Schema } from '../machines/game'
-import { Context, Event } from '../machines/types'
+import { Context, Event, Schema } from '../machines/types'
 
 export const gameContext = createContext<
   [

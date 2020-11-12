@@ -11,18 +11,6 @@ import { createRoom, joinRoom } from '../lib/p2p'
 import { mergeMachineOptions } from './helper'
 import { GameContext } from './types/game.types'
 
-export interface Schema {
-  states: {
-    menu: {}
-    joining: {}
-    creating: {}
-    playing: TurnStateSchema
-    checkGameFinished: {}
-    alternating: {}
-    gameOver: {}
-  }
-}
-
 const gameMachineInitialContext: GameContext = {
   cells: [],
   currentPlayer: 1,
@@ -113,7 +101,7 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
       actions: [
         () => console.log('SYNC'),
         assign({
-          boardCells: (_, event) => event.state.boardCells,
+          // boardCells: (_, event) => event.state.boardCells,
           cells: (_, event) => event.state.cells,
           currentPlayer: (_, event) => event.state.currentPlayer,
         }),
