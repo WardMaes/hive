@@ -68,8 +68,10 @@ export const removeCellStates = (states: CellStateEnum[], cell: Cell): Cell => {
   const refCell: Cell = {
     ...cell,
   }
-  console.log(states)
-  refCell.state = refCell.state.filter((state) => !states.includes(state))
+  console.log('states', states)
+  console.log('refCell1', refCell)
+  refCell.state = cell.state.filter((state) => !states.includes(state))
+  console.log('refCell2', refCell)
   return refCell
 }
 
@@ -77,7 +79,9 @@ export const removeCellStatesFromCells = (
   states: CellStateEnum[],
   cells: Cell[]
 ): Cell[] => {
-  return cells.map((cell) => removeCellStates(states, cell))
+  const x = cells.map((cell) => removeCellStates(states, cell))
+  console.log('x', x)
+  return x
 }
 
 export const filterTempCells = (cells: Cell[]): Cell[] => {

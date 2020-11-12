@@ -30,6 +30,9 @@ const Cell = ({
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer
 
+  const isSelectable = cell.state.includes(CellStateEnum.SELECTABLE)
+  const isDestination = cell.state.includes(CellStateEnum.DESTINATION)
+
   return (
     <div
       className={classNames('cell', {

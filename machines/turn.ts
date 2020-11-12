@@ -16,21 +16,8 @@ import {
   removeCellStatesFromCells,
 } from '../lib/game'
 import { Context, Event } from './types'
-import { TurnContext } from './types/turn.types'
-import { InsectName } from '../lib/insect'
-import { sync } from '../lib/p2p'
-
-export interface TurnStateSchema {
-  initial: 'selecting'
-  states: {
-    selecting: {}
-    selectedToPlace: {}
-    placing: {}
-    moving: {}
-    finish: {}
-  }
-}
 import { TurnContext, TurnStateSchema } from './types/turn.types'
+import { sync } from '../lib/p2p'
 
 export const turnMachineInitialContext: TurnContext = {
   selectableCells: [],
@@ -143,11 +130,11 @@ export const turnMachine: TurnStateSchema = {
     finish: {
       entry: [
         // Cleanup
-        (context) => {
+        (context: any) => {
           console.log(context)
         },
         'filterEmptyTempCells',
-        assign<Context>({
+        assign({
           cells: ({ cells }) =>
             removeCellStatesFromCells(
               [
@@ -159,7 +146,7 @@ export const turnMachine: TurnStateSchema = {
             ),
         }),
         'sync',
-        (context) => {
+        (context: any) => {
           console.log(context)
         },
       ],
