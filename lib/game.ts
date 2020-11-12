@@ -68,10 +68,7 @@ export const removeCellStates = (states: CellStateEnum[], cell: Cell): Cell => {
   const refCell: Cell = {
     ...cell,
   }
-  console.log('states', states)
-  console.log('refCell1', refCell)
   refCell.state = cell.state.filter((state) => !states.includes(state))
-  console.log('refCell2', refCell)
   return refCell
 }
 
@@ -80,12 +77,11 @@ export const removeCellStatesFromCells = (
   cells: Cell[]
 ): Cell[] => {
   const x = cells.map((cell) => removeCellStates(states, cell))
-  console.log('x', x)
   return x
 }
 
-export const filterTempCells = (cells: Cell[]): Cell[] => {
-  return cells.filter((cell) => !cell.state.includes(CellStateEnum.TEMPORARY))
+export const filterEmptyCells = (cells: Cell[]): Cell[] => {
+  return cells.filter((cell) => cell.pieces.length > 0)
 }
 
 export const createCellWithInsect = (
@@ -124,7 +120,7 @@ export const createTempEmptyCell = (hexCoord: HexCoord): Cell => {
   return {
     coord: hexCoord,
     pieces: [],
-    state: [CellStateEnum.TEMPORARY],
+    state: [],
   }
 }
 
@@ -269,7 +265,7 @@ export const getValidCellsToMove = (
 ): Cell[] => {
   const playersQueenNotPlayed =
     playerHand.get(InsectName.queen) && playerHand.get(InsectName.queen)! > 0
-  if (!playersQueenNotPlayed) {
+  if (playersQueenNotPlayed) {
     const cellsControlledByPlayer = getCellsControlledByPlayer(
       boardCells,
       currentPlayer

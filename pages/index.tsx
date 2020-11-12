@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       // simple state logging
-      console.log('in useeffect', state)
+      // console.log('in useeffect', state)
     })
 
     return subscription.unsubscribe

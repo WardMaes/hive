@@ -293,7 +293,6 @@ export const walkPerimeter = (
           const neighborIndex = neighbors.findIndex((neighborCoord) =>
             haveSameCubeCoordinates(neighborCoord, coord)
           )
-          console.log(actualModulo(neighborIndex - 1, 6))
           const leftNeighborOccupied = checkOccupationInLookupTable(
             neighbors[actualModulo(neighborIndex - 1, 6)],
             lookUp

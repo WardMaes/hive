@@ -12,7 +12,7 @@ import {
   removeCellStates,
   removeInsectFromUnplayed,
   getTopPieceOfCell,
-  filterTempCells,
+  filterEmptyCells,
   removeCellStatesFromCells,
 } from '../lib/game'
 import { Context, Event } from './types'
@@ -37,9 +37,6 @@ export const turnMachine: TurnStateSchema = {
     selecting: {
       // Set which pieces can be moved and which insects can be placed so user can select one
       entry: [
-        // (context) => {
-        //   console.log(context)
-        // },
         // 'filterEmptyTempCells',
         // 'removeDestinationStates',
         'setCellsAllowedToMove',
@@ -54,7 +51,7 @@ export const turnMachine: TurnStateSchema = {
       entry: ['setSelectedUnplayedInsect', 'setPlacementCells'],
       on: {
         'CELL.SELECT': [
-          // Selected cell was a temporary cell corresponding to a placement location
+          // Selected cell was a temporary empty cell corresponding to a placement location
           {
             target: 'placing',
             cond: 'selectedCellIsDestination',
@@ -62,6 +59,7 @@ export const turnMachine: TurnStateSchema = {
           // Otherwise was an already placed cell and player wants to exit placement and enter movement with that piece
           {
             target: 'selectedToMove',
+            actions: ['resetSelectedUnplayedInsect', 'filterEmptyCells'],
           },
         ],
         'UNPLAYEDPIECE.SELECT': [
@@ -69,24 +67,18 @@ export const turnMachine: TurnStateSchema = {
             target: 'selecting',
             // Check if selected piece was toggled
             cond: 'toggledUnplayedInsectSelection',
-            actions: ['resetSelectedUnplayedInsect', 'filterEmptyTempCells'],
+            actions: ['resetSelectedUnplayedInsect', 'filterEmptyCells'],
           },
           // Otherwise selected another unplayed insect to place
           {
             target: 'selectedToPlace',
-            actions: ['resetSelectedUnplayedInsect', 'filterEmptyTempCells'],
+            actions: ['resetSelectedUnplayedInsect', 'filterEmptyCells'],
           },
         ],
       },
     },
     selectedToMove: {
-      entry: [
-        'filterEmptyTempCells',
-        'removeDestinationStates',
-        'setSelectedCell',
-        'setDestinationsOfMoves',
-        'sync',
-      ],
+      entry: ['setSelectedCell', 'setDestinationsOfMoves', 'sync'],
       on: {
         'CELL.SELECT': [
           // Select a move destination cell
@@ -98,15 +90,29 @@ export const turnMachine: TurnStateSchema = {
           {
             target: 'selecting',
             cond: 'toggledCellSelection',
-            actions: ['resetSelectedCell'],
+            actions: [
+              'resetSelectedCell',
+              'removeDestinationStates',
+              'filterEmptyCells',
+            ],
           },
           // Select another cell which is not the selected cell or one of its destinations
           // If it is a cell that was valid to move, switch to moving with that cell
-          { target: 'selectedToMove' },
+          {
+            target: 'selectedToMove',
+            actions: ['removeDestinationStates', 'filterEmptyCells'],
+          },
         ],
         'UNPLAYEDPIECE.SELECT': [
           // If a placable insect is selected, switch to placing that
-          { target: 'selectedToPlace', actions: ['resetSelectedCell'] },
+          {
+            target: 'selectedToPlace',
+            actions: [
+              'resetSelectedCell',
+              'removeDestinationStates',
+              'filterEmptyCells',
+            ],
+          },
         ],
       },
     },
@@ -130,25 +136,23 @@ export const turnMachine: TurnStateSchema = {
     finish: {
       entry: [
         // Cleanup
-        (context: any) => {
-          console.log(context)
-        },
-        'filterEmptyTempCells',
+        'filterEmptyCells',
         assign({
-          cells: ({ cells }) =>
-            removeCellStatesFromCells(
+          cells: ({ cells }) => {
+            console.log(cells)
+            const fixed = removeCellStatesFromCells(
               [
                 CellStateEnum.DESTINATION,
                 CellStateEnum.SELECTABLE,
                 CellStateEnum.SELECTED,
               ],
               cells
-            ),
+            )
+            console.log(fixed)
+            return fixed
+          },
         }),
         'sync',
-        (context: any) => {
-          console.log(context)
-        },
       ],
       always: [{ target: '#check' }],
     },
@@ -170,20 +174,8 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
       cells: (context) =>
         removeCellStatesFromCells([CellStateEnum.DESTINATION], context.cells),
     }),
-    filterEmptyTempCells: assign({
-      cells: (context) => {
-        // Remove TEMP state if it has pieces
-        const cells = context.cells.map((cell) => {
-          if (
-            cell.state.includes(CellStateEnum.TEMPORARY) &&
-            cell.pieces.length > 0
-          ) {
-            return removeCellStates([CellStateEnum.TEMPORARY], cell)
-          }
-          return cell
-        })
-        return filterTempCells(cells)
-      },
+    filterEmptyCells: assign({
+      cells: ({ cells }) => filterEmptyCells(cells),
     }),
     setDestinationsOfMoves: assign({
       cells: (context, event) => {
@@ -192,10 +184,12 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
           const moves = getValidMovesForCell(selectedCell, context.cells)
           const destinations = moves.map((move) => move.destination)
           const existingCells = context.cells.map((cell) => {
-            const isDestination = destinations.findIndex((destCoord) =>
-              haveSameCubeCoordinates(destCoord, cell.coord)
-            )
+            const isDestination =
+              destinations.findIndex((destCoord) =>
+                haveSameCubeCoordinates(destCoord, cell.coord)
+              ) !== -1
             if (!isDestination) {
+              // TODO not actually task of function but doesnt hurt maar me PeRfOrMaNcE
               cell = removeCellStates([CellStateEnum.DESTINATION], cell)
             } else {
               cell = addCellStates([CellStateEnum.DESTINATION], cell)
@@ -251,10 +245,12 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
             : context.unplayedInsectsPlayer2,
           context.cells
         )
+        console.log('Moveable cells:', moveableCells)
         return context.cells.map((cell) => {
-          const isMovable = moveableCells.findIndex((moveCell) =>
-            haveSameCubeCoordinates(moveCell.coord, cell.coord)
-          )
+          const isMovable =
+            moveableCells.findIndex((moveCell) =>
+              haveSameCubeCoordinates(moveCell.coord, cell.coord)
+            ) !== -1
           if (isMovable) {
             cell.state.push(CellStateEnum.SELECTABLE)
           }
