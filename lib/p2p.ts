@@ -24,7 +24,8 @@ let peer2: ConnectionType
 export async function createRoom(callback: Function) {
   console.log('creating room')
   peer1 = new Peer({
-    host: 'peer-connection.herokuapp.com',
+    host: 'https://peer-connection.herokuapp.com',
+    secure: true,
     port: 80,
     path: '/peerjs/hive',
     initiator: true,
@@ -58,6 +59,7 @@ export async function joinRoom(roomId: string, callback: Function) {
   console.log('joining room', roomId)
   const peer = new Peer({
     host: 'peer-connection.herokuapp.com',
+    secure: true,
     port: 80,
     path: '/peerjs/hive',
     initiator: false,
