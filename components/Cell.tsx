@@ -6,7 +6,7 @@ import { gameContext } from '../context/machines'
 
 import { haveSameCubeCoordinates } from '../lib/hex'
 
-import { Cell as CellType, CellStateEnum, getTopPieceOfCell } from '../lib/game'
+import { Cell as CellType, CellStateEnum } from '../lib/game'
 
 type CellProps = {
   // selectable: boolean

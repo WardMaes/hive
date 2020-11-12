@@ -370,7 +370,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
         ? event.insectName === context.selectedUnplayedInsect
         : false
     },
-    selectedCellIsDestination: (context, event) => {
+    selectedCellIsDestination: (_, event) => {
       if (event.type == 'CELL.SELECT') {
         const selectedCell = event.cell
         return selectedCell.state.includes(CellStateEnum.DESTINATION)
