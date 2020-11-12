@@ -6,17 +6,17 @@ import { gameContext } from '../context/machines'
 
 import { haveSameCubeCoordinates } from '../lib/hex'
 
-import { Cell as CellType, getTopPieceOfCell } from '../lib/game'
+import { Cell as CellType, CellStateEnum, getTopPieceOfCell } from '../lib/game'
 
 type CellProps = {
-  selectable: boolean
+  // selectable: boolean
   cell: CellType
   gridColumnStart: number
   gridRowStart: number
 }
 
 const Cell = ({
-  selectable,
+  // selectable,
   cell,
   gridColumnStart,
   gridRowStart,
@@ -28,13 +28,16 @@ const Cell = ({
     selectedCell && haveSameCubeCoordinates(selectedCell.coord, cell.coord)
   const topPiece = getTopPieceOfCell(cell)
 
+  const isSelectable = cell.state.includes(CellStateEnum.SELECTABLE)
+  const isDestination = cell.state.includes(CellStateEnum.DESTINATION)
+
   return (
     <div
       className={classNames('cell', {
         // 'cell-z': isSelected,
         selected: isSelected,
         tempCell: !topPiece,
-        selectable: selectable,
+        selectable: isSelectable,
       })}
       // className={'cell' + (isSelected ? ' cell-z' : '')}
       style={{ gridColumnStart, gridRowStart }}
@@ -43,7 +46,9 @@ const Cell = ({
         className={classNames('cell_content', {
           isSelected: false /* TODO: add cell-occupied as class if selected */,
         })}
-        onClick={() => selectable && sendToGame('CELL.SELECT', { cell })}
+        onClick={() =>
+          (isSelectable || isDestination) && sendToGame('CELL.SELECT', { cell })
+        }
       >
         <div
           className={classNames('cell_clip ', {

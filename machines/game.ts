@@ -53,9 +53,6 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
       // Transient state that simply changes player turn
       always: {
         actions: [
-          (context) => {
-            console.log(context)
-          },
           assign({
             currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
           }),

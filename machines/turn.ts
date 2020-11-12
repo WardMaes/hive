@@ -36,8 +36,11 @@ export const turnMachine: TurnStateSchema = {
     selecting: {
       // Set which pieces can be moved and which insects can be placed so user can select one
       entry: [
-        'filterEmptyTempCells',
-        'removeDestinationStates',
+        // (context) => {
+        //   console.log(context)
+        // },
+        // 'filterEmptyTempCells',
+        // 'removeDestinationStates',
         'setCellsAllowedToMove',
         'setInsectsAllowedToPlace',
       ],
@@ -47,12 +50,7 @@ export const turnMachine: TurnStateSchema = {
       },
     },
     selectedToPlace: {
-      entry: [
-        'filterEmptyTempCells',
-        'removeDestinationStates',
-        'setSelectedUnplayedInsect',
-        'setPlacementCells',
-      ],
+      entry: ['setSelectedUnplayedInsect', 'setPlacementCells'],
       on: {
         'CELL.SELECT': [
           // Selected cell was a temporary cell corresponding to a placement location
@@ -70,10 +68,13 @@ export const turnMachine: TurnStateSchema = {
             target: 'selecting',
             // Check if selected piece was toggled
             cond: 'toggledUnplayedInsectSelection',
-            actions: ['resetSelectedUnplayedInsect'],
+            actions: ['resetSelectedUnplayedInsect', 'filterEmptyTempCells'],
           },
           // Otherwise selected another unplayed insect to place
-          { target: 'selectedToPlace' },
+          {
+            target: 'selectedToPlace',
+            actions: ['resetSelectedUnplayedInsect', 'filterEmptyTempCells'],
+          },
         ],
       },
     },
@@ -108,7 +109,7 @@ export const turnMachine: TurnStateSchema = {
       },
     },
     placing: {
-      entry: ['moveSelectedToDestination'],
+      entry: ['placeInsectAndUpdateUnplaced', 'resetSelectedUnplayedInsect'],
       always: [{ target: 'finish' }],
       // after: {
       //   // After a 1s animation, go to finished state
@@ -125,15 +126,27 @@ export const turnMachine: TurnStateSchema = {
       // },
     },
     finish: {
-      // entry: [
-      //   // Cleanup
-      //   assign<Context, Event>({
-      //     selectedCell: () => undefined,
-      //     selectedUnplayedInsect: () => undefined,
-      //     selectableCells: () => [],
-      //     cells: (context) => [...context.boardCells],
-      //   }),
-      // ],
+      entry: [
+        // Cleanup
+        (context) => {
+          console.log(context)
+        },
+        'filterEmptyTempCells',
+        assign<Context>({
+          cells: ({ cells }) =>
+            removeCellStatesFromCells(
+              [
+                CellStateEnum.DESTINATION,
+                CellStateEnum.SELECTABLE,
+                CellStateEnum.SELECTED,
+              ],
+              cells
+            ),
+        }),
+        (context) => {
+          console.log(context)
+        },
+      ],
       always: [{ target: '#check' }],
     },
   },
@@ -141,6 +154,10 @@ export const turnMachine: TurnStateSchema = {
 
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
+    removeSelectableStates: assign({
+      cells: (context) =>
+        removeCellStatesFromCells([CellStateEnum.SELECTABLE], context.cells),
+    }),
     resetSelectedCell: assign({
       cells: (context) =>
         removeCellStatesFromCells([CellStateEnum.SELECTED], context.cells),
@@ -251,16 +268,20 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
         ),
     }),
     setPlacementCells: assign({
-      cells: (context) => {
+      cells: ({ cells, currentPlayer }) => {
         const validPlacementCoords = getValidPlacementCoordinates(
-          context.cells,
-          context.currentPlayer
+          cells,
+          currentPlayer
         )
-        return validPlacementCoords.map((coord) => {
-          const tempCell = createTempEmptyCell(coord)
-          tempCell.state = [...tempCell.state, CellStateEnum.DESTINATION]
-          return tempCell
-        })
+        return [
+          ...cells,
+          ...validPlacementCoords.map((coord) => {
+            return addCellStates(
+              [CellStateEnum.DESTINATION],
+              createTempEmptyCell(coord)
+            )
+          }),
+        ]
       },
     }),
     moveSelectedToDestination: assign({

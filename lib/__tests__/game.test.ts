@@ -1,0 +1,80 @@
+import {
+  Cell,
+  CellStateEnum,
+  removeCellStates,
+  removeCellStatesFromCells,
+} from '../game'
+
+describe('Game logic testing', () => {
+  const cellA: Cell = {
+    coord: { x: Infinity, y: Infinity, z: Infinity },
+    pieces: [],
+    state: [
+      CellStateEnum.DESTINATION,
+      CellStateEnum.SELECTABLE,
+      CellStateEnum.SELECTED,
+    ],
+  }
+  it('should return the cell with the given states removed', () => {
+    expect(
+      removeCellStates(
+        [CellStateEnum.DESTINATION, CellStateEnum.SELECTED],
+        cellA
+      ).state
+    ).toEqual([CellStateEnum.SELECTABLE])
+    expect(removeCellStates([CellStateEnum.TEMPORARY], cellA).state).toEqual([
+      CellStateEnum.DESTINATION,
+      CellStateEnum.SELECTABLE,
+      CellStateEnum.SELECTED,
+    ])
+    expect(
+      removeCellStates(
+        [
+          CellStateEnum.DESTINATION,
+          CellStateEnum.SELECTABLE,
+          CellStateEnum.SELECTED,
+        ],
+        cellA
+      ).state
+    ).toEqual([])
+  })
+
+  it('should return the cells without the given states', () => {
+    expect(
+      removeCellStatesFromCells(
+        [CellStateEnum.DESTINATION, CellStateEnum.SELECTABLE],
+        [
+          {
+            coord: { x: Infinity, y: Infinity, z: Infinity },
+            pieces: [],
+            state: [
+              CellStateEnum.DESTINATION,
+              CellStateEnum.SELECTABLE,
+              CellStateEnum.SELECTED,
+            ],
+          },
+          {
+            coord: { x: Infinity, y: Infinity, z: Infinity },
+            pieces: [],
+            state: [
+              CellStateEnum.DESTINATION,
+              CellStateEnum.TEMPORARY,
+              CellStateEnum.SELECTED,
+            ],
+          },
+        ]
+      )
+    ).toEqual([
+      {
+        coord: { x: Infinity, y: Infinity, z: Infinity },
+        pieces: [],
+        state: [CellStateEnum.SELECTED],
+      },
+      {
+        coord: { x: Infinity, y: Infinity, z: Infinity },
+        pieces: [],
+        state: [CellStateEnum.TEMPORARY, CellStateEnum.SELECTED],
+      },
+    ])
+  })
+})

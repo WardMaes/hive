@@ -16,10 +16,10 @@ export type Board = {
 }
 
 export enum CellStateEnum {
-  SELECTABLE,
-  SELECTED,
-  TEMPORARY,
-  DESTINATION,
+  SELECTABLE = 'selectable',
+  SELECTED = 'selected',
+  TEMPORARY = 'temporary',
+  DESTINATION = 'destination',
   // TODO either add state which sets path of move or add list to cell with moves of which the cell is a part of the path and do logic in frontend
   // PARTOFPATH,
 }
@@ -65,8 +65,12 @@ export const addCellStates = (states: CellStateEnum[], cell: Cell): Cell => {
 }
 
 export const removeCellStates = (states: CellStateEnum[], cell: Cell): Cell => {
-  cell.state = cell.state.filter((state) => !states.includes(state))
-  return cell
+  const refCell: Cell = {
+    ...cell,
+  }
+  console.log(states)
+  refCell.state = refCell.state.filter((state) => !states.includes(state))
+  return refCell
 }
 
 export const removeCellStatesFromCells = (
@@ -77,7 +81,7 @@ export const removeCellStatesFromCells = (
 }
 
 export const filterTempCells = (cells: Cell[]): Cell[] => {
-  return cells.filter((cell) => cell.state.includes(CellStateEnum.TEMPORARY))
+  return cells.filter((cell) => !cell.state.includes(CellStateEnum.TEMPORARY))
 }
 
 export const createCellWithInsect = (
