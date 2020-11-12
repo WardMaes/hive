@@ -4,6 +4,7 @@ import {
   removeCellStates,
   removeCellStatesFromCells,
 } from '../game'
+import { InsectName } from '../insect'
 
 describe('Game logic testing', () => {
   const cellA: Cell = {
@@ -14,6 +15,20 @@ describe('Game logic testing', () => {
       CellStateEnum.SELECTABLE,
       CellStateEnum.SELECTED,
     ],
+  }
+  const cellB: Cell = {
+    coord: {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
+    pieces: [
+      {
+        insectName: InsectName.ant,
+        ofPlayer: 1,
+      },
+    ],
+    state: [CellStateEnum.SELECTABLE],
   }
   it('should return the cell with the given states removed', () => {
     expect(
@@ -37,6 +52,10 @@ describe('Game logic testing', () => {
         cellA
       ).state
     ).toEqual([])
+
+    expect(removeCellStates([CellStateEnum.SELECTABLE], cellB).state).toEqual(
+      []
+    )
   })
 
   it('should return the cells without the given states', () => {
