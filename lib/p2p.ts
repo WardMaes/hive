@@ -54,8 +54,9 @@ export async function createRoom(callback: Function) {
 
   console.log('peer1', peer1)
 
-  peer1.on('error', function (err: any) {
-    console.log('Peer 1 error', err)
+  peer1.on('error', function (error: any) {
+    console.log('Peer 1 error', error)
+    throw new Error(error)
   })
 
   const id = await peer1.id
@@ -111,8 +112,9 @@ export async function joinRoom(roomId: string, callback: Function) {
     },
   })
 
-  peer.on('error', function (err: any) {
-    console.log('Peer 2 error', err)
+  peer.on('error', function (error: any) {
+    console.log('Peer 2 error', error)
+    throw new Error(error)
   })
 
   // const id = await peer.id

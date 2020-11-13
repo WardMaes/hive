@@ -19,6 +19,7 @@ const gameMachineInitialContext: GameContext = {
   unplayedInsectsPlayer2: getStartInsectsPlayer(),
   roomId: '',
   playerId: 1,
+  error: undefined,
 }
 
 const gameMachineSansOptions = Machine<Context, Schema, Event>({
@@ -50,6 +51,13 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
             playerId: (_) => 2,
           }),
         },
+        onError: {
+          target: 'error',
+          actions: assign({
+            roomId: (_) => '',
+            error: (_, event) => event.data,
+          }),
+        },
       },
     },
     creating: {
@@ -60,10 +68,20 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
         },
         onDone: {
           target: 'playing',
-          actions: assign({ roomId: (_, event) => event.data }),
+          actions: assign({
+            roomId: (_, event) => event.data,
+          }),
+        },
+        onError: {
+          target: 'error',
+          actions: assign({
+            roomId: (_) => '',
+            error: (_, event) => event.data,
+          }),
         },
       },
     },
+    error: {},
     playing: {
       ...turnMachine,
     },
@@ -97,6 +115,10 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     gameOver: {},
   },
   on: {
+    RESET: {
+      target: 'menu',
+      actions: assign((_) => ({ ...gameMachineInitialContext })),
+    },
     SYNC: {
       actions: [
         () => console.log('SYNC'),

@@ -9,7 +9,7 @@ import Menu from '../components/Menu'
 import Loader from '../components/Loader'
 
 export default function Home() {
-  const [gameState] = useContext(gameContext)
+  const [gameState, sendToGame] = useContext(gameContext)
 
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer
@@ -23,7 +23,7 @@ export default function Home() {
 
       <main>
         {gameState.matches('menu') && (
-          <div className="my-32">
+          <div className="my-32 p-8 bg-white shadow-md rounded">
             <Menu />
           </div>
         )}
@@ -39,6 +39,22 @@ export default function Home() {
             <Loader text="Joining game..." />
           </div>
         )}
+
+        {gameState.matches('error') && (
+          <div className="my-32 flex flex-col justify-center items-center text-center">
+            <h2 className="text-2xl">An error occured </h2>
+            <span className="text-red-600 my-4">
+              {JSON.stringify(gameState.context.error, null, 2)}
+            </span>
+            <button
+              className="btn hover:bg-gray-400"
+              onClick={() => sendToGame('RESET')}
+            >
+              Back to menu
+            </button>
+          </div>
+        )}
+
         {gameState.matches('playing') && (
           <div className="game" style={{ width: '100%' }}>
             <div className="fixed top-0 right-0 p-4">

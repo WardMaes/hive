@@ -11,6 +11,7 @@ export interface GameStateSchema {
     menu: {}
     joining: {}
     creating: {}
+    error: {}
     playing: TurnStateSchema
     checkGameFinished: {}
     alternating: {}
@@ -30,6 +31,7 @@ export interface GameContext {
   unplayedInsectsPlayer2: PlayerHand
   roomId: string
   playerId: number
+  error: string | undefined
 }
 
 /* 
@@ -41,3 +43,5 @@ export type GameEvent =
   | { type: 'GAME.JOIN'; code: string }
   | { type: 'GAME.CREATE' }
   | { type: 'SYNC'; state: GameContext }
+  | { type: 'PEER.ERROR'; error: string }
+  | { type: 'RESET' }
