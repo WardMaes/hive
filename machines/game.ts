@@ -135,12 +135,6 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
             ],
           },
         ],
-        // 'ONLINE.OPPONENTTURNDONE': {
-        //   target: 'playing',
-        //   actions: [
-
-        //   ],
-        // },
       },
     },
     opponentDone: {

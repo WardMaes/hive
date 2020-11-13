@@ -252,7 +252,6 @@ export const getValidCellsToMove = (
 ): Cell[] => {
   const playersQueenNotPlayed =
     playerHand.get(InsectName.queen) && playerHand.get(InsectName.queen)! > 0
-  // console.log('Queen been placed', playersQueenNotPlayed, playerHand)
   if (!playersQueenNotPlayed) {
     const cellsControlledByPlayer = getCellsControlledByPlayer(
       boardCells,
