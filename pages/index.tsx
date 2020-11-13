@@ -65,7 +65,7 @@ export default function Home() {
             </div>
             <div className="insect-selector">
               <InsectSelector
-                insects={
+                playerHand={
                   gameState.context.currentPlayer === 1
                     ? gameState.context.unplayedInsectsPlayer1
                     : gameState.context.unplayedInsectsPlayer2

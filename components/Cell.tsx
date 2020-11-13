@@ -24,7 +24,7 @@ const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer
 
-  const isSelectable = cell.state.includes(CellStateEnum.SELECTABLE)
+  const isSelectable = cell.state.includes(CellStateEnum.MOVEABLE)
   const isDestination = cell.state.includes(CellStateEnum.DESTINATION)
 
   return (

@@ -7,11 +7,10 @@ import { gameContext } from '../context/machines'
 import { PlayerHand } from '../lib/game'
 
 type InsectSelectorProps = {
-  // TODO: rename
-  insects: PlayerHand
+  playerHand: PlayerHand
 }
 
-const InsectSelector = ({ insects }: InsectSelectorProps) => {
+const InsectSelector = ({ playerHand: insects }: InsectSelectorProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
   let individualInsects: InsectName[] = []

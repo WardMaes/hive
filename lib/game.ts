@@ -15,7 +15,7 @@ export type Board = {
 }
 
 export enum CellStateEnum {
-  SELECTABLE = 'selectable',
+  MOVEABLE = 'moveable',
   SELECTED = 'selected',
   TEMPORARY = 'temporary',
   DESTINATION = 'destination',
@@ -252,7 +252,8 @@ export const getValidCellsToMove = (
 ): Cell[] => {
   const playersQueenNotPlayed =
     playerHand.get(InsectName.queen) && playerHand.get(InsectName.queen)! > 0
-  if (playersQueenNotPlayed) {
+  // console.log('Queen been placed', playersQueenNotPlayed, playerHand)
+  if (!playersQueenNotPlayed) {
     const cellsControlledByPlayer = getCellsControlledByPlayer(
       boardCells,
       currentPlayer
@@ -269,6 +270,7 @@ export const getValidCellsToMove = (
           ) === -1
         ) {
           // TODO intuition says unneccesary but maybe generate moves to check if moves are available for piece
+          // Examples: Surrounded cells, diamond-shaped hole in hive with spider in one of them
           return true
         }
       }
@@ -306,17 +308,3 @@ const getOccupiedNeighborCellsOfCoord = (
 const getControllingPlayerOfCell = (cell: Cell): number | undefined => {
   return getTopPieceOfCell(cell)?.ofPlayer
 }
-
-// // TODO Check if moving piece on top would break the hive (only one on the stack + articulation point check)
-// const movementWouldBreakHive = (cell: Cell): Boolean => {
-//   // Can only be broken if it is the bottom level
-//   // if (cell.pieces.length > 1) {
-//   //   return false
-//   // } else {
-//   //   const articPoints = getArticulationPointsHexCoordinates(
-//   //     this.boardCells.map((cell) => cell.coord)
-//   //   )
-//   //   return
-//   // }
-//   return true
-// }

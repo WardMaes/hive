@@ -131,7 +131,7 @@ export const turnMachine: TurnStateSchema = {
             const fixed = removeCellStatesFromCells(
               [
                 CellStateEnum.DESTINATION,
-                CellStateEnum.SELECTABLE,
+                CellStateEnum.MOVEABLE,
                 CellStateEnum.SELECTED,
               ],
               cells
@@ -151,7 +151,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
     sync: (context) => sync(context),
     removeSelectableStates: assign({
       cells: (context) =>
-        removeCellStatesFromCells([CellStateEnum.SELECTABLE], context.cells),
+        removeCellStatesFromCells([CellStateEnum.MOVEABLE], context.cells),
     }),
     resetSelectedCell: assign({
       cells: (context) =>
@@ -225,11 +225,15 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
     }),
     setCellsAllowedToMove: assign({
       cells: (context) => {
-        const moveableCells = getValidCellsToMove(
-          context.currentPlayer,
+        console.log('setCellsAllowedToMove entered')
+        const currentPlayerhand =
           context.currentPlayer === 1
             ? context.unplayedInsectsPlayer1
-            : context.unplayedInsectsPlayer2,
+            : context.unplayedInsectsPlayer2
+        // console.log(context.currentPlayer, currentPlayerhand)
+        const moveableCells = getValidCellsToMove(
+          context.currentPlayer,
+          currentPlayerhand,
           context.cells
         )
         return context.cells.map((cell) => {
@@ -238,7 +242,7 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
               haveSameCubeCoordinates(moveCell.coord, cell.coord)
             ) !== -1
           if (isMovable) {
-            cell.state.push(CellStateEnum.SELECTABLE)
+            cell.state.push(CellStateEnum.MOVEABLE)
           }
           return cell
         })
