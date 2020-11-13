@@ -12,6 +12,8 @@ export interface GameStateSchema {
     playing: TurnStateSchema
     checkGameFinished: {}
     alternating: {}
+    opponentTurn: {}
+    opponentDone: {}
     gameOver: {}
   }
 }
@@ -38,3 +40,4 @@ export type GameEvent =
   | { type: 'SYNC'; state: GameContext }
   | { type: 'PEER.ERROR'; error: string }
   | { type: 'RESET' }
+  | { type: 'ONLINE.OPPONENTTURNDONE'; state: GameContext }

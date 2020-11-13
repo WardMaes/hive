@@ -48,7 +48,8 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
           return joinRoom(event.code, callback)
         },
         onDone: {
-          target: 'playing',
+          // target: 'playing',
+          target: 'opponentTurn',
           actions: assign({
             playerId: (_) => 2,
           }),
@@ -98,15 +99,53 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
         actions: [
           assign({
             currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
-          }),
-          assign({
-            // Increment turn if changed from player 2 to player 1
             turn: (context) =>
               context.currentPlayer === 1 ? context.turn + 1 : context.turn,
           }),
         ],
-        target: 'playing',
+        target: 'opponentTurn',
+        // target: 'playing',
       },
+    },
+    // TODO temp state for online play
+    opponentTurn: {
+      on: {
+        SYNC: [
+          {
+            target: 'opponentDone',
+            cond: (context, event) =>
+              context.currentPlayer !== event.state.currentPlayer,
+            actions: [
+              assign({
+                cells: (_, event) => event.state.cells,
+              }),
+              () => {
+                console.log('Opponent Done')
+              },
+            ],
+          },
+          {
+            actions: [
+              () => console.log('SYNC'),
+              assign({
+                // boardCells: (_, event) => event.state.boardCells,
+                cells: (_, event) => event.state.cells,
+                // currentPlayer: (_, event) => event.state.currentPlayer,
+              }),
+            ],
+          },
+        ],
+      },
+    },
+    opponentDone: {
+      entry: [
+        assign({
+          currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1),
+          turn: (context) =>
+            context.currentPlayer === 1 ? context.turn + 1 : context.turn,
+        }),
+      ],
+      always: 'playing',
     },
     gameOver: {},
   },
@@ -115,14 +154,7 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
       target: 'menu',
       actions: assign((_) => ({ ...gameMachineInitialContext })),
     },
-    SYNC: {
-      actions: [
-        assign({
-          cells: (_, event) => event.state.cells,
-          currentPlayer: (_, event) => event.state.currentPlayer,
-        }),
-      ],
-    },
+    // SYNC: {},
   },
 })
 
