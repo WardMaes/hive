@@ -67,7 +67,6 @@ const Cell = ({
                 src={`/icons/${topPiece.insectName.toLowerCase()}.svg`}
                 unsized
                 alt={`${topPiece.insectName}`}
-                priority
               />
             </div>
           ) : (
