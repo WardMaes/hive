@@ -90,13 +90,7 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     checkGameFinished: {
       id: 'check',
       // Transient transition with conditionals to check whether game is over
-      always: [
-        // {
-        //   target: 'gameOver',
-        //   cond: 'isGameOver',
-        // },
-        { target: 'alternating' },
-      ],
+      always: [{ target: 'alternating' }],
     },
     alternating: {
       // Transient state that simply changes player turn
@@ -123,9 +117,7 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     },
     SYNC: {
       actions: [
-        () => console.log('SYNC'),
         assign({
-          // boardCells: (_, event) => event.state.boardCells,
           cells: (_, event) => event.state.cells,
           currentPlayer: (_, event) => event.state.currentPlayer,
         }),

@@ -50,9 +50,7 @@ const filterOverlap = (
   )
 }
 
-/* 
-  Lookup table
-*/
+/* Lookup table */
 
 type HexLookupTable<T = null> = {
   [x: number]: { [y: number]: { [z: number]: T[] | null } }
@@ -89,9 +87,7 @@ export const checkOccupationInLookupTable = <T>(
   return x in lookUp && y in lookUp[x] && z in lookUp[x][y]
 }
 
-/* 
-  Articulation
-*/
+/* Articulation */
 
 export const isHexCoordinateArticulationPoint = (
   coord: HexCoord,
@@ -128,7 +124,7 @@ export const isHexCoordinateArticulationPoint = (
   return uniqueCoords.length > 0
 }
 
-// TODO implement more efficient connected modules in graph algorithm to find all articulation points
+// TODO: implement more efficient connected modules in graph algorithm to find all articulation points
 export const getArticulationPointsHexCoordinates = (
   hexCoords: HexCoord[]
 ): HexCoord[] => {
@@ -236,16 +232,13 @@ const getArticulationPointsHexCoordinatesRecHelper = (
   })
 }
 
-/* 
-  Perimeter walking
-*/
+/* Perimeter walking */
 
 export const walkPerimeter = (
   startCoord: HexCoord,
   allCoords: HexCoord[],
   max_distance = Infinity
 ): Move[] => {
-  // FFS WTF JAVASCRIPT
   const actualModulo = (a: number, b: number): number =>
     a >= 0 ? a % b : b + (a % b)
   // Make sure to filter the startCoord from all coordinates
@@ -321,9 +314,7 @@ export const walkPerimeter = (
   return foundMoves.slice(1)
 }
 
-/* 
-  Axis
-*/
+/* Axis */
 
 // Return arrays for each direction, on each axis, with other coordinates on that axis, ordered by distance
 export enum Axis {

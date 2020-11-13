@@ -38,9 +38,10 @@
   --hex-border-color: #2962c4;
 }
 
-.cell.tempCell {
+.cell__temp {
   --hex-border: 5px;
   --hex-border-color: #7a7878;
+  cursor: pointer;
 }
 
 .cell.selectable {
@@ -59,7 +60,6 @@
   width: 100%;
   height: 100%;
   clip-path: polygon(75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%, 25% 0);
-
   background-color: var(--hex-border-color);
 }
 

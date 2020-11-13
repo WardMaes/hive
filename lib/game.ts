@@ -31,7 +31,6 @@ export type Cell = {
 }
 export type Piece = {
   ofPlayer: number
-  // insect: Insect
   insectName: InsectName
 }
 export type PlayerHand = Map<InsectName, number>
@@ -50,9 +49,7 @@ const insectsForExpansion = {
   ],
 }
 
-/* 
-  General
-*/
+/* General */
 
 export const addCellStates = (states: CellStateEnum[], cell: Cell): Cell => {
   states.forEach((state) => {
@@ -93,7 +90,6 @@ export const createCellWithInsect = (
     pieces: [
       {
         insectName: insectName,
-        // insect: getInsectByName(insectName),
         ofPlayer: player,
       },
     ],
@@ -130,9 +126,7 @@ export const getTopPieceOfCell = ({ pieces }: Cell): Piece | null => {
   return null
 }
 
-/* 
-  Game specific
-*/
+/* Game specific */
 
 export const getStartInsectsPlayer = (): PlayerHand => {
   let insects: Map<InsectName, number> = new Map()
@@ -161,13 +155,9 @@ export const isGameOver = (boardCells: Cell[]): boolean => {
   )
 }
 
-/* 
-  TURN SPECIFIC
-*/
+/* TURN SPECIFIC */
 
-/* 
-  Placing
-*/
+/* Placing */
 
 export const removeInsectFromUnplayed = (
   unplayedInsectsOfPlayer: PlayerHand,
@@ -242,9 +232,7 @@ export const getValidPlacementCoordinates = (
   return uniqueCoordinates(validCoords)
 }
 
-/* 
-  Moving
-*/
+/* Moving */
 
 export const getValidMovesForCell = (
   cell: Cell,
@@ -291,9 +279,7 @@ export const getValidCellsToMove = (
   return []
 }
 
-/* 
-  PRIVATE HELPERS
-*/
+/* PRIVATE HELPERS */
 
 const getCellsControlledByPlayer = (
   boardCells: Cell[],

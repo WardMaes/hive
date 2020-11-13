@@ -38,12 +38,7 @@ export const turnMachine: TurnStateSchema = {
   states: {
     selecting: {
       // Set which pieces can be moved and which insects can be placed so user can select one
-      entry: [
-        // 'filterEmptyTempCells',
-        // 'removeDestinationStates',
-        'setCellsAllowedToMove',
-        'setInsectsAllowedToPlace',
-      ],
+      entry: ['setCellsAllowedToMove', 'setInsectsAllowedToPlace'],
       on: {
         'UNPLAYEDPIECE.SELECT': { target: 'selectedToPlace' },
         'CELL.SELECT': { target: 'selectedToMove' },
@@ -121,19 +116,11 @@ export const turnMachine: TurnStateSchema = {
     placing: {
       entry: ['placeInsectAndUpdateUnplaced', 'resetSelectedUnplayedInsect'],
       always: [{ target: 'finish' }],
-      // after: {
-      //   // After a 1s animation, go to finished state
-      //   500: '#check',
-      // },
     },
     moving: {
       // Animation to be played in frontend while in this state
       entry: ['moveSelectedToDestination', 'sync'],
       always: [{ target: 'finish' }],
-      // after: {
-      //   // After a 1s animation, go to finished state
-      //   500: '#check',
-      // },
     },
     finish: {
       entry: [
@@ -141,7 +128,6 @@ export const turnMachine: TurnStateSchema = {
         'filterEmptyCells',
         assign({
           cells: ({ cells }) => {
-            console.log(cells)
             const fixed = removeCellStatesFromCells(
               [
                 CellStateEnum.DESTINATION,
@@ -150,7 +136,6 @@ export const turnMachine: TurnStateSchema = {
               ],
               cells
             )
-            console.log(fixed)
             return fixed
           },
         }),
@@ -247,7 +232,6 @@ export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
             : context.unplayedInsectsPlayer2,
           context.cells
         )
-        console.log('Moveable cells:', moveableCells)
         return context.cells.map((cell) => {
           const isMovable =
             moveableCells.findIndex((moveCell) =>

@@ -172,11 +172,3 @@ it('detects as non articulation point', () => {
     isHexCoordinateArticulationPoint({ x: -2, y: 0, z: 2 }, occupiedCells)
   ).toEqual(false)
 })
-
-// it('finds the entire perimeter', () => {
-//   expect(walkPerimeter({ x: 1, y: -1, z: 0 }, occupiedCells)).toEqual(true)
-// })
-
-// it('finds articulation points', () => {
-//   console.log(getArticulationPointsHexCoordinates(occupiedCells))
-// })

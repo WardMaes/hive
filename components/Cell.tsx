@@ -9,18 +9,12 @@ import { haveSameCubeCoordinates } from '../lib/hex'
 import { Cell as CellType, CellStateEnum } from '../lib/game'
 
 type CellProps = {
-  // selectable: boolean
   cell: CellType
   gridColumnStart: number
   gridRowStart: number
 }
 
-const Cell = ({
-  // selectable,
-  cell,
-  gridColumnStart,
-  gridRowStart,
-}: CellProps) => {
+const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
   const selectedCell = gameState.context.selectedCell
@@ -36,12 +30,10 @@ const Cell = ({
   return (
     <div
       className={classNames('cell', {
-        // 'cell-z': isSelected,
         selected: isSelected,
-        tempCell: !topPiece,
+        cell__temp: !topPiece,
         selectable: isSelectable,
       })}
-      // className={'cell' + (isSelected ? ' cell-z' : '')}
       style={{ gridColumnStart, gridRowStart }}
     >
       <div
@@ -58,7 +50,6 @@ const Cell = ({
           className={classNames('cell_clip ', {
             'player-1': topPiece && topPiece.ofPlayer === 1,
             'player-2': topPiece && topPiece.ofPlayer === 2,
-            // (topPiece?.ofPlayer === 1 ? 'player-1' : 'player-2')
           })}
         >
           {topPiece ? (

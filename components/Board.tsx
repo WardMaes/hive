@@ -1,8 +1,7 @@
 import { HexCoord } from '../lib/hex'
 import { Cell as CellType } from '../lib/game'
-import Cell from './Cell'
-// import { useContext } from 'react'
-// import { gameContext } from '../context/machines'
+
+import { Cell } from './index'
 
 type BoardCoordinate = {
   row: number
@@ -26,8 +25,6 @@ const convertCellToGridLocation = (
 }
 
 const Board = ({ cells }: BoardProps) => {
-  // const [state] = useContext(gameContext)
-
   // Calculating properties to calculate size of board as a grid and to map coordinates
   const minXCoordinate = cells.reduce(
     (acc, { coord }) => (acc = Math.min(acc, coord.x)),
@@ -61,11 +58,6 @@ const Board = ({ cells }: BoardProps) => {
 
         return (
           <Cell
-            // selectable={
-            //   state.context.selectableCells.findIndex((selecCell) =>
-            //     haveSameCubeCoordinates(cell.coord, selecCell.coord)
-            //   ) !== -1
-            // }
             cell={cell}
             key={`${cell.coord.x}-${cell.coord.y}-${cell.coord.z}`}
             gridColumnStart={gridColumnStart}

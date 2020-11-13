@@ -23,7 +23,6 @@ let peer1: PeerType
 let peer2: ConnectionType
 
 export async function createRoom(callback: Function) {
-  console.log('creating room')
   peer1 = new Peer({
     host: 'peer-connection.herokuapp.com',
     secure: true,
@@ -53,24 +52,19 @@ export async function createRoom(callback: Function) {
     },
   })
 
-  console.log('peer1', peer1)
-
   peer1.on('error', function (error: any) {
-    console.log('Peer 1 error', error)
     throw new Error(error)
   })
 
   const id = await peer1.id
 
   peer1.on('connect', function (connection: ConnectionType) {
-    console.log('Peer connectionected:', connection.peerId)
+    console.log('Peer connected:', connection.peerId)
     peer2 = connection
 
     connection.peer.on('data', (data: DataType) => {
       // connection.peer.send(JSON.stringify({ hi2: 'hi you 2' }))
-
       const parsed = JSON.parse(data.toString())
-      console.log('parsed', parsed)
 
       if (parsed.type === 'sync') {
         // send SYNC event to game machine
@@ -83,7 +77,6 @@ export async function createRoom(callback: Function) {
 }
 
 export async function joinRoom(roomId: string, callback: Function) {
-  console.log('joining room', roomId)
   const peer = new Peer({
     host: 'peer-connection.herokuapp.com',
     secure: true,
@@ -114,7 +107,6 @@ export async function joinRoom(roomId: string, callback: Function) {
   })
 
   peer.on('error', function (error: any) {
-    console.log('Peer 2 error', error)
     throw new Error(error)
   })
 
@@ -126,10 +118,9 @@ export async function joinRoom(roomId: string, callback: Function) {
 
   x2.peer.on('data', (data: DataType) => {
     const parsed = JSON.parse(data.toString())
-    console.log('parsed2', parsed)
 
     if (parsed.type === 'sync') {
-      // send SYNC event to game machine
+      // Send SYNC event to game machine
       callback({ type: 'SYNC', state: parsed.data })
     }
   })
@@ -137,9 +128,8 @@ export async function joinRoom(roomId: string, callback: Function) {
 
 export async function sync(context: Context) {
   console.log('syncing')
-  // user is host
+  // User is host
   if (context.roomId && peer1 && peer1.peer) {
-    console.log('sending to 2')
     peer1.peer.send(
       JSON.stringify({
         type: 'sync',
@@ -147,8 +137,7 @@ export async function sync(context: Context) {
       })
     )
   } else if (peer2 && peer2.peer) {
-    // user is joiner
-    console.log('sending to 1')
+    // User is joiner
     peer2.peer.send(
       JSON.stringify({
         type: 'sync',
@@ -157,11 +146,3 @@ export async function sync(context: Context) {
     )
   }
 }
-
-// function sendToHost(dataToSend)
-
-// function sendToJoiners(dataToSend)
-
-// function createRoom(): connectionId1
-
-// function joinRoom(connectionId1): connectoinId2
