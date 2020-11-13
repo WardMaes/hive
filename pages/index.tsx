@@ -52,7 +52,8 @@ export default function Home() {
           </div>
         )}
 
-        {gameState.matches('playing') && (
+        {(gameState.matches('playing') ||
+          gameState.matches('opponentTurn')) && (
           <div className="game" style={{ width: '100%' }}>
             <div className="fixed top-0 right-0 p-4">
               {playerToMove ? 'Your turn' : "Opponent's turn"}
