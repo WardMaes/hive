@@ -6,22 +6,13 @@ import { gameContext } from '../context/machines'
 import InsectSelector from '../components/InsectSelector'
 import Board from '../components/Board'
 import Menu from '../components/Menu'
+import Loader from '../components/Loader'
 
 export default function Home() {
   const [gameState] = useContext(gameContext)
 
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer
-
-  // TODO if unused, remove
-  // useEffect(() => {
-  //   const subscription = service.subscribe((state) => {
-  //     // simple state logging
-  //     // console.log('in useeffect', state)
-  //   })
-
-  //   return subscription.unsubscribe
-  // }, [service]) // note: service should never change
 
   return (
     <>
@@ -37,6 +28,17 @@ export default function Home() {
           </div>
         )}
 
+        {gameState.matches('creating') && (
+          <div className="my-32">
+            <Loader text="Creating game..." />
+          </div>
+        )}
+
+        {gameState.matches('joining') && (
+          <div className="my-32">
+            <Loader text="Joining game..." />
+          </div>
+        )}
         {gameState.matches('playing') && (
           <div className="game" style={{ width: '100%' }}>
             <div className="fixed top-0 right-0 p-4">
