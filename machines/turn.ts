@@ -1,5 +1,7 @@
 import { assign, MachineOptions } from 'xstate'
+
 import { haveSameCubeCoordinates } from '../lib/hex'
+import { sync } from '../lib/p2p'
 import {
   CellStateEnum,
   addCellStates,
@@ -15,9 +17,9 @@ import {
   filterEmptyCells,
   removeCellStatesFromCells,
 } from '../lib/game'
-import { Context, Event } from './types'
+
 import { TurnContext, TurnStateSchema } from './types/turn.types'
-import { sync } from '../lib/p2p'
+import { Context, Event } from './types'
 
 export const turnMachineInitialContext: TurnContext = {
   selectableCells: [],

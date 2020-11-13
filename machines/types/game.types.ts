@@ -1,10 +1,7 @@
 import { TurnStateSchema } from './turn.types'
 import { Cell, PlayerHand } from '../../lib/game'
-// import {  } from "../../lib/game";
 
-/* 
-  Schema
-*/
+/* Schema */
 
 export interface GameStateSchema {
   states: {
@@ -19,9 +16,7 @@ export interface GameStateSchema {
   }
 }
 
-/* 
-    Context
-*/
+/* Context */
 
 export interface GameContext {
   cells: Cell[]
@@ -34,9 +29,7 @@ export interface GameContext {
   error: string | undefined
 }
 
-/* 
-    Event
-*/
+/* Event */
 
 export type GameEvent =
   | { type: 'TURN.OVER' }

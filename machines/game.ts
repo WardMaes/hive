@@ -1,15 +1,17 @@
 import { Machine, assign, MachineOptions } from 'xstate'
-import { getStartInsectsPlayer } from '../lib/game'
 
+import { getStartInsectsPlayer } from '../lib/game'
+import { createRoom, joinRoom } from '../lib/p2p'
+
+import { GameContext } from './types/game.types'
 import { Context, Event, Schema } from './types'
+
+import { mergeMachineOptions } from './helper'
 import {
   turnMachine,
   turnMachineConfig,
   turnMachineInitialContext,
 } from './turn'
-import { createRoom, joinRoom } from '../lib/p2p'
-import { mergeMachineOptions } from './helper'
-import { GameContext } from './types/game.types'
 
 const gameMachineInitialContext: GameContext = {
   cells: [],

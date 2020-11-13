@@ -3,10 +3,7 @@ import { useContext } from 'react'
 
 import { gameContext } from '../context/machines'
 
-import InsectSelector from '../components/InsectSelector'
-import Board from '../components/Board'
-import Menu from '../components/Menu'
-import Loader from '../components/Loader'
+import { InsectSelector, Board, Menu, Loader } from '../components'
 
 export default function Home() {
   const [gameState, sendToGame] = useContext(gameContext)

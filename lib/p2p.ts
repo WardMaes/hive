@@ -1,5 +1,6 @@
 // @ts-ignore : typings don't exist for this package
 import Peer from 'simple-peerjs'
+
 import { Context } from '../machines/types'
 
 type PeerType = {

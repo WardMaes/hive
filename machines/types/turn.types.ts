@@ -2,9 +2,7 @@ import { Cell } from '../../lib/game'
 import { Move } from '../../lib/hex'
 import { InsectName } from '../../lib/insect'
 
-/* 
-  Schema
-*/
+/* Schema */
 
 export interface TurnStateSchema {
   initial: 'selecting'
@@ -18,9 +16,7 @@ export interface TurnStateSchema {
   }
 }
 
-/* 
-    Context
-*/
+/* Context */
 
 export interface TurnContext {
   selectableCells: Cell[]
@@ -35,9 +31,7 @@ export interface TurnContext {
   tempCells?: Cell[]
 }
 
-/* 
-    Event
-*/
+/* Event */
 
 export type TurnEvent =
   | { type: 'CELL.SELECT'; cell: Cell }

@@ -8,7 +8,6 @@ import {
   haveSameCubeCoordinates,
   uniqueCoordinates,
 } from './hex'
-// import { getInsectByName, InsectName, Insect, Queen } from './insect'
 import { getInsectByName, InsectName } from './insect'
 
 export type Board = {
