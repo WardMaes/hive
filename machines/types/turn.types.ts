@@ -1,5 +1,4 @@
 import { Cell } from '../../lib/game'
-import { Move } from '../../lib/hex'
 import { InsectName } from '../../lib/insect'
 
 /* Schema */
@@ -19,16 +18,16 @@ export interface TurnStateSchema {
 /* Context */
 
 export interface TurnContext {
-  selectableCells: Cell[]
-  validMoves?: Move[]
-  cellsAllowedToMove?: Cell[]
+  // selectableCells: Cell[]
+  // validMoves?: Move[]
+  // cellsAllowedToMove?: Cell[]
   insectsAllowedToPlace?: InsectName[]
   selectedUnplayedInsect?: InsectName
-  selectedCell?: Cell
+  // selectedCell?: Cell
   // TODO Merge to validDestinaitons and add collection of newly created cells to handle the rest
-  placementCells?: Cell[]
-  validDestinations?: Cell[]
-  tempCells?: Cell[]
+  // placementCells?: Cell[]
+  // validDestinations?: Cell[]
+  // tempCells?: Cell[]
 }
 
 /* Event */
