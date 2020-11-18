@@ -16,6 +16,7 @@ import {
   getTopPieceOfCell,
   filterEmptyCells,
   removeCellStatesFromCells,
+  Cell,
 } from '../lib/game'
 
 import { TurnContext, TurnStateSchema } from './types/turn.types'
@@ -38,7 +39,19 @@ export const turnMachine: TurnStateSchema = {
   states: {
     selecting: {
       // Set which pieces can be moved and which insects can be placed so user can select one
-      entry: ['setCellsAllowedToMove', 'setInsectsAllowedToPlace'],
+      entry: [
+        // Reset all state
+        // TODO perhaps move to seperate action
+        assign<Context, Event>({
+          cells: (context) =>
+            context.cells.map(
+              ({ coord, pieces }) =>
+                <Cell>{ coord: coord, pieces: pieces, state: [] }
+            ),
+        }),
+        'setCellsAllowedToMove',
+        'setInsectsAllowedToPlace',
+      ],
       on: {
         'UNPLAYEDPIECE.SELECT': { target: 'selectedToPlace' },
         'CELL.SELECT': { target: 'selectedToMove' },
@@ -97,7 +110,11 @@ export const turnMachine: TurnStateSchema = {
           // If it is a cell that was valid to move, switch to moving with that cell
           {
             target: 'selectedToMove',
-            actions: ['removeDestinationStates', 'filterEmptyCells'],
+            actions: [
+              'removeDestinationStates',
+              'filterEmptyCells',
+              'resetSelectedCell',
+            ],
           },
         ],
         'UNPLAYEDPIECE.SELECT': [
