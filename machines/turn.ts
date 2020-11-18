@@ -23,15 +23,15 @@ import { TurnContext, TurnStateSchema } from './types/turn.types'
 import { Context, Event } from './types'
 
 export const turnMachineInitialContext: TurnContext = {
-  selectableCells: [],
-  cellsAllowedToMove: [],
+  // selectableCells: [],
+  // cellsAllowedToMove: [],
   insectsAllowedToPlace: [],
   selectedUnplayedInsect: undefined,
-  selectedCell: undefined,
-  placementCells: undefined,
-  tempCells: [],
-  validDestinations: [],
-  validMoves: [],
+  // selectedCell: undefined,
+  // placementCells: undefined,
+  // tempCells: [],
+  // validDestinations: [],
+  // validMoves: [],
 }
 
 export const turnMachine: TurnStateSchema = {
