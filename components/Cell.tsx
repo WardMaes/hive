@@ -53,11 +53,14 @@ const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
           })}
         >
           {topPiece ? (
-            <div className="insect" style={{ padding: '20%' }}>
+            <div className="insect">
               <Image
                 src={`/icons/${topPiece.insectName.toLowerCase()}.svg`}
-                unsized
+                layout="fill"
+                objectFit="contain"
                 alt={`${topPiece.insectName}`}
+                // TODO: fix !important
+                className="p-8 !important"
               />
             </div>
           ) : (
