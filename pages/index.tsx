@@ -18,7 +18,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
+      <main className="w-screen h-screen flex justify-center flex-col items-center">
         {gameState.matches('menu') && (
           <div className="my-32 p-8 bg-white shadow-md rounded">
             <Menu />
@@ -54,25 +54,23 @@ export default function Home() {
 
         {(gameState.matches('playing') ||
           gameState.matches('opponentTurn')) && (
-          <div className="game" style={{ width: '100%' }}>
+          <div className="flex-grow flex flex-col h-full w-full">
             <div className="fixed top-0 right-0 p-4">
               {playerToMove ? 'Your turn' : "Opponent's turn"}
             </div>
-            <div className="board-wrapper">
+            <div className="flex items-center justify-center content-center p-4 flex-grow">
               <Board
                 cells={gameState.context.cells}
                 selectableCells={gameState.context.selectableCells}
               />
             </div>
-            <div className="insect-selector">
-              <InsectSelector
-                playerHand={
-                  gameState.context.currentPlayer === 1
-                    ? gameState.context.unplayedInsectsPlayer1
-                    : gameState.context.unplayedInsectsPlayer2
-                }
-              />
-            </div>
+            <InsectSelector
+              playerHand={
+                gameState.context.currentPlayer === 1
+                  ? gameState.context.unplayedInsectsPlayer1
+                  : gameState.context.unplayedInsectsPlayer2
+              }
+            />
           </div>
         )}
       </main>

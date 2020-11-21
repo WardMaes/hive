@@ -25,7 +25,3 @@ body {
 * {
   box-sizing: border-box;
 }
-
-main {
-  @apply flex justify-center flex-col items-center p-4;
-}
