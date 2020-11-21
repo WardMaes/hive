@@ -15,13 +15,6 @@ const InsectSelector = ({ playerHand: insects }: InsectSelectorProps) => {
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer
 
-  /*
-  display: block;
-  border: 1px solid darkgray;
-  padding: 1rem;
-  margin: 0.1rem;
-    */
-
   return (
     <div className="flex flex-row gap-2 p-2 justify-center flex-wrap bg-gray-300 border-t border-gray-500">
       {Array.from(insects, ([insectName, amount]) => (
