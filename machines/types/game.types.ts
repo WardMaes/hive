@@ -35,8 +35,8 @@ export interface GameContext {
 
 export type GameEvent =
   | { type: 'TURN.OVER' }
-  | { type: 'GAME.JOIN'; code: string }
-  | { type: 'GAME.CREATE' }
+  | { type: 'GAME.JOIN'; roomId: string }
+  | { type: 'GAME.CREATE'; roomId: string }
   | { type: 'SYNC'; state: GameContext }
   | { type: 'PEER.ERROR'; error: string }
   | { type: 'RESET' }

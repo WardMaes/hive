@@ -1,23 +1,42 @@
-import React, { useContext, useState } from 'react'
-import { gameContext } from '../context/machines'
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+
+import { generateRoomId } from '../lib/p2p'
 
 const Menu = () => {
-  const [, sendToGame] = useContext(gameContext)
+  const router = useRouter()
   const [code, setCode] = useState('')
+  const [generated, setGenerated] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!code) {
+      return
+    }
+    router.push({
+      pathname: 'rooms/' + code,
+      query: {},
+    })
+  }
+
+  useEffect(() => {
+    // useEffect so the generated roomId is the same on client and server
+    setGenerated(generateRoomId())
+  }, [])
 
   return (
     <div className="flex flex-col justify-center ">
-      <button
+      <a
+        href={'/rooms/' + generated + '?create=1'}
         className="btn hover:bg-gray-400"
-        onClick={() => sendToGame('GAME.CREATE')}
       >
         Create game
-      </button>
+      </a>
 
       <div className="text-center my-8">OR</div>
 
       <form
-        onSubmit={() => sendToGame('GAME.JOIN', { code })}
+        onSubmit={() => handleSubmit}
         className="flex flex-col justify-center"
       >
         <input
@@ -27,13 +46,13 @@ const Menu = () => {
           value={code}
           onChange={(e) => setCode(e.target.value)}
         />
-        <button
+        <a
+          href={'/rooms/' + code}
           className={'btn' + (!code ? ' btn-disabled' : ' hover:bg-gray-400')}
-          type="submit"
-          disabled={!code}
         >
           Join game
-        </button>
+        </a>
+        <button onClick={handleSubmit} className="hidden" type="submit" />
       </form>
     </div>
   )

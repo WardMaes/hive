@@ -31,10 +31,10 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     menu: {
       on: {
         'GAME.JOIN': {
-          target: 'joining', // TODO: go to /rooms/[roomId]
+          target: 'joining',
         },
         'GAME.CREATE': {
-          target: 'creating', // TODO: go to /rooms/[roomId]
+          target: 'creating',
         },
       },
     },
@@ -45,10 +45,9 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
           if (event.type !== 'GAME.JOIN') {
             return
           }
-          return joinRoom(event.code, callback)
+          return joinRoom(event.roomId, callback)
         },
         onDone: {
-          // target: 'playing',
           target: 'opponentTurn',
           actions: assign({
             playerId: (_) => 2,
@@ -66,8 +65,10 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     creating: {
       invoke: {
         id: 'createRoom',
-        src: (_) => (callback) => {
-          return createRoom(callback)
+        src: (_, event) => (callback) => {
+          if (event.type === 'GAME.CREATE') {
+            return createRoom(event.roomId, callback)
+          }
         },
         onDone: {
           target: 'playing',
@@ -104,7 +105,6 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
           }),
         ],
         target: 'opponentTurn',
-        // target: 'playing',
       },
     },
     // TODO temp state for online play

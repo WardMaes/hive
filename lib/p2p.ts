@@ -22,8 +22,9 @@ type DataType = {}
 let peer1: PeerType
 let peer2: ConnectionType
 
-export async function createRoom(callback: Function) {
+export async function createRoom(roomId: string, callback: Function) {
   peer1 = new Peer({
+    id: roomId,
     host: 'peer-connection.herokuapp.com',
     secure: true,
     port: 443,
@@ -145,4 +146,8 @@ export async function sync(context: Context) {
       })
     )
   }
+}
+
+export const generateRoomId = () => {
+  return Math.random().toString(26).substring(5, 10)
 }

@@ -60,7 +60,7 @@ const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
                 objectFit="contain"
                 alt={`${topPiece.insectName}`}
                 // TODO: fix !important
-                className="p-8 !important"
+                className="p-15 !important"
               />
             </div>
           ) : (

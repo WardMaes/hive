@@ -132,6 +132,11 @@
   border: 0;
 }
 
+/* TODO: remove this */
+.p-15 {
+  padding: 15% !important;
+}
+
 .debug {
   position: fixed;
   left: 0px;

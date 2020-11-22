@@ -20,7 +20,9 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppProps> = ({
   return (
     <GameContext.Provider value={game}>
       <Debug />
-      <Component {...modifiedPageProps} />
+      <main>
+        <Component {...modifiedPageProps} />
+      </main>
     </GameContext.Provider>
   )
 }
