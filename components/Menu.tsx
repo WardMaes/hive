@@ -28,7 +28,7 @@ const Menu = () => {
     <div className="flex flex-col justify-center ">
       <a
         href={'/rooms/' + generated + '?create=1'}
-        className="btn hover:bg-gray-400"
+        className="btn text-center hover:bg-gray-400"
       >
         Create game
       </a>
@@ -48,7 +48,9 @@ const Menu = () => {
         />
         <a
           href={'/rooms/' + code}
-          className={'btn' + (!code ? ' btn-disabled' : ' hover:bg-gray-400')}
+          className={
+            'btn text-center' + (!code ? ' btn-disabled' : ' hover:bg-gray-400')
+          }
         >
           Join game
         </a>
