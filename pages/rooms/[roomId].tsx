@@ -69,7 +69,7 @@ const Room = ({ roomId, initiator }: RoomProps) => {
             <div className="board-wrapper">
               <Board
                 cells={gameState.context.cells}
-                selectableCells={gameState.context.selectableCells}
+                // selectableCells={gameState.context.selectableCells}
               />
             </div>
             <div className="insect-selector">

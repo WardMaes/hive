@@ -106,6 +106,7 @@ export const generateRoomId = () => {
 
 const createPeer = (isInitiater: boolean, id?: string) => {
   return new Peer({
+    id: id,
     host: 'peer-connection.herokuapp.com',
     secure: true,
     port: 443,
