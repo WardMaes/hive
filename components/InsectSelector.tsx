@@ -29,11 +29,12 @@ const InsectSelector = ({ playerHand: insects }: InsectSelectorProps) => {
         const insectCanBePlayed = gameState.context.insectsAllowedToPlace?.includes(
           insectName
         )
+        const isSelectedInsect =
+          gameState.context.selectedUnplayedInsect! === insectName
         return (
           <div
             className={classNames('insect', {
-              insect__selected:
-                gameState.context.selectedUnplayedInsect! === insectName,
+              insect__selected: isSelectedInsect,
               insect__disabled: !playerToMove || !insectCanBePlayed,
             })}
             key={i + 1}
