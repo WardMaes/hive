@@ -3,9 +3,16 @@ import Peer from 'simple-peerjs'
 
 import { Context } from '../machines/types'
 
+// enum PeerEventType {
+//   connect = 'connect',
+//   data = 'data',
+//   close = 'close',
+//   error = 'error',
+// }
+
 type PeerType = {
   id: Promise<string>
-  on: Function
+  on: (event: string, callback: Function) => {}
   connect: Function
   send: Function
   peer?: ConnectionType
@@ -23,34 +30,7 @@ let peer1: PeerType
 let peer2: ConnectionType
 
 export async function createRoom(callback: Function) {
-  peer1 = new Peer({
-    host: 'peer-connection.herokuapp.com',
-    secure: true,
-    port: 443,
-    path: '/peerjs/hive',
-    initiator: true,
-    simplePeer: {
-      config: {
-        iceServers: [
-          {
-            urls: 'turn:relay.backups.cz',
-            credential: 'webrtc',
-            username: 'webrtc',
-          },
-          {
-            urls: 'turn:numb.viagenie.ca',
-            username: 'nofaxe3842@wgraj.com',
-            credential: 'nofaxe3842@wgraj.com',
-          },
-          {
-            urls: 'turn:relay.backups.cz?transport=tcp',
-            credential: 'webrtc',
-            username: 'webrtc',
-          },
-        ],
-      },
-    },
-  })
+  peer1 = createPeer(true)
 
   peer1.on('error', function (error: any) {
     throw new Error(error)
@@ -77,34 +57,7 @@ export async function createRoom(callback: Function) {
 }
 
 export async function joinRoom(roomId: string, callback: Function) {
-  const peer = new Peer({
-    host: 'peer-connection.herokuapp.com',
-    secure: true,
-    port: 443,
-    path: '/peerjs/hive',
-    initiator: false,
-    simplePeer: {
-      config: {
-        iceServers: [
-          {
-            urls: 'turn:relay.backups.cz',
-            credential: 'webrtc',
-            username: 'webrtc',
-          },
-          {
-            urls: 'turn:relay.backups.cz?transport=tcp',
-            credential: 'webrtc',
-            username: 'webrtc',
-          },
-          {
-            urls: 'turn:numb.viagenie.ca',
-            username: 'nofaxe3842@wgraj.com',
-            credential: 'nofaxe3842@wgraj.com',
-          },
-        ],
-      },
-    },
-  })
+  const peer = createPeer(false)
 
   peer.on('error', function (error: any) {
     throw new Error(error)
@@ -145,4 +98,35 @@ export async function sync(context: Context) {
       })
     )
   }
+}
+
+const createPeer = (isInitiater: boolean) => {
+  return new Peer({
+    host: 'peer-connection.herokuapp.com',
+    secure: true,
+    port: 443,
+    path: '/peerjs/hive',
+    initiator: isInitiater,
+    simplePeer: {
+      config: {
+        iceServers: [
+          {
+            urls: 'turn:relay.backups.cz',
+            credential: 'webrtc',
+            username: 'webrtc',
+          },
+          {
+            urls: 'turn:relay.backups.cz?transport=tcp',
+            credential: 'webrtc',
+            username: 'webrtc',
+          },
+          {
+            urls: 'turn:numb.viagenie.ca',
+            username: 'nofaxe3842@wgraj.com',
+            credential: 'nofaxe3842@wgraj.com',
+          },
+        ],
+      },
+    },
+  })
 }
