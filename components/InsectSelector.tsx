@@ -25,27 +25,33 @@ const InsectSelector = ({ playerHand: insects }: InsectSelectorProps) => {
     <div
       className={'flex flex-row justify-center content-center h-full flex-wrap'}
     >
-      {individualInsects.map((insectName, i) => (
-        <div
-          className={classNames('insect', {
-            insect__selected:
-              gameState.context.selectedUnplayedInsect! === insectName,
-            insect__disabled: !playerToMove,
-          })}
-          key={i + 1}
-          onClick={() => {
-            playerToMove && sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
-          }}
-        >
-          <Image
-            src={`/icons/${insectName.toLowerCase()}.svg`}
-            width="50"
-            height="50"
-            alt={`${insectName}`}
-            priority
-          />
-        </div>
-      ))}
+      {individualInsects.map((insectName, i) => {
+        const insectCanBePlayed = gameState.context.insectsAllowedToPlace?.includes(
+          insectName
+        )
+        return (
+          <div
+            className={classNames('insect', {
+              insect__selected:
+                gameState.context.selectedUnplayedInsect! === insectName,
+              insect__disabled: !playerToMove || !insectCanBePlayed,
+            })}
+            key={i + 1}
+            onClick={() => {
+              ;(playerToMove || !insectCanBePlayed) &&
+                sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
+            }}
+          >
+            <Image
+              src={`/icons/${insectName.toLowerCase()}.svg`}
+              width="50"
+              height="50"
+              alt={`${insectName}`}
+              priority
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }
