@@ -39,7 +39,7 @@ const InsectSelector = ({ playerHand: insects }: InsectSelectorProps) => {
             })}
             key={i + 1}
             onClick={() => {
-              ;(playerToMove || !insectCanBePlayed) &&
+              if (playerToMove || !insectCanBePlayed)
                 sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
             }}
           >

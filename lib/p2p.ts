@@ -3,6 +3,8 @@ import Peer from 'simple-peerjs'
 
 import { Context } from '../machines/types'
 
+import ice_servers from '../config/webrtc_ICE_servers.json'
+
 // enum PeerEventType {
 //   connect = 'connect',
 //   data = 'data',
@@ -104,33 +106,17 @@ export const generateRoomId = () => {
   return Math.random().toString(26).substring(5, 10)
 }
 
-const createPeer = (isInitiater: boolean, id?: string) => {
+const createPeer = (initiator: boolean, id?: string) => {
   return new Peer({
-    id: id,
+    id,
     host: 'peer-connection.herokuapp.com',
     secure: true,
     port: 443,
     path: '/peerjs/hive',
-    initiator: isInitiater,
+    initiator: initiator,
     simplePeer: {
       config: {
-        iceServers: [
-          {
-            urls: 'turn:relay.backups.cz',
-            credential: 'webrtc',
-            username: 'webrtc',
-          },
-          {
-            urls: 'turn:relay.backups.cz?transport=tcp',
-            credential: 'webrtc',
-            username: 'webrtc',
-          },
-          {
-            urls: 'turn:numb.viagenie.ca',
-            username: 'nofaxe3842@wgraj.com',
-            credential: 'nofaxe3842@wgraj.com',
-          },
-        ],
+        iceServers: ice_servers,
       },
     },
   })
