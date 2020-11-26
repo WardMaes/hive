@@ -35,12 +35,14 @@ const InsectSelector = ({ playerHand: insects }: InsectSelectorProps) => {
           <div
             className={classNames('insect', {
               insect__selected: isSelectedInsect,
-              insect__disabled: !playerToMove || !insectCanBePlayed,
+              insect__disabled: !(playerToMove && insectCanBePlayed),
             })}
             key={i + 1}
             onClick={() => {
-              if (playerToMove || !insectCanBePlayed)
+              if (playerToMove && insectCanBePlayed) {
+                console.log(playerToMove, insectCanBePlayed)
                 sendToGame('UNPLAYEDPIECE.SELECT', { insectName })
+              }
             }}
           >
             <Image
