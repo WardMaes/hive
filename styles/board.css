@@ -118,8 +118,10 @@
 }
 
 .insect__disabled {
-  user-select: none;
-  cursor: not-allowed;
+  @apply opacity-50;
+  @apply cursor-not-allowed;
+  /* user-select: none;
+  cursor: not-allowed; */
 }
 
 .insect-wrap:hover {

@@ -4,8 +4,6 @@ import Image from 'next/image'
 
 import { gameContext } from '../context/machines'
 
-import { haveSameCubeCoordinates } from '../lib/hex'
-
 import { Cell as CellType, CellStateEnum } from '../lib/game'
 
 type CellProps = {
@@ -17,9 +15,8 @@ type CellProps = {
 const Cell = ({ cell, gridColumnStart, gridRowStart }: CellProps) => {
   const [gameState, sendToGame] = useContext(gameContext)
 
-  const selectedCell = gameState.context.selectedCell
-  const isSelected =
-    selectedCell && haveSameCubeCoordinates(selectedCell.coord, cell.coord)
+  // const selectedCell = gameState.context.selectedCell
+  const isSelected = cell.state.includes(CellStateEnum.SELECTED)
   const topPiece = cell.pieces[cell.pieces.length - 1]
   const playerToMove =
     gameState.context.playerId === gameState.context.currentPlayer

@@ -97,13 +97,7 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     alternating: {
       // Transient state that simply changes player turn
       always: {
-        actions: [
-          assign({
-            currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
-            turn: (context) =>
-              context.currentPlayer === 1 ? context.turn + 1 : context.turn,
-          }),
-        ],
+        actions: ['changePlayerAndUpdateTurn'],
         target: 'opponentTurn',
       },
     },
@@ -116,9 +110,7 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
             cond: (context, event) =>
               context.currentPlayer !== event.state.currentPlayer,
             actions: [
-              assign({
-                cells: (_, event) => event.state.cells,
-              }),
+              'updateContextWithSync',
               () => {
                 console.log('Opponent Done')
               },
@@ -127,24 +119,22 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
           {
             actions: [
               () => console.log('SYNC'),
-              assign({
-                // boardCells: (_, event) => event.state.boardCells,
-                cells: (_, event) => event.state.cells,
-                // currentPlayer: (_, event) => event.state.currentPlayer,
-              }),
+              (context, event) => {
+                console.log(
+                  context.unplayedInsectsPlayer1,
+                  context.unplayedInsectsPlayer2,
+                  event.state.unplayedInsectsPlayer1,
+                  event.state.unplayedInsectsPlayer2
+                )
+              },
+              'updateContextWithSync',
             ],
           },
         ],
       },
     },
     opponentDone: {
-      entry: [
-        assign({
-          currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1),
-          turn: (context) =>
-            context.currentPlayer === 1 ? context.turn + 1 : context.turn,
-        }),
-      ],
+      entry: ['changePlayerAndUpdateTurn'],
       always: 'playing',
     },
     gameOver: {},
@@ -159,7 +149,29 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
 })
 
 const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
-  actions: {},
+  actions: {
+    updateContextWithSync: assign({
+      cells: (context, event) => {
+        console.log(event)
+        return event.type === 'SYNC' ? event.state.cells : context.cells
+      },
+      // Update playerhand of opponent
+      // unplayedInsectsPlayer1: (context, event) =>
+      //   context.currentPlayer === 2 && event.type === 'SYNC'
+      //     ? event.state.unplayedInsectsPlayer1
+      //     : context.unplayedInsectsPlayer1,
+      // unplayedInsectsPlayer2: (context, event) =>
+      //   context.currentPlayer === 1 && event.type === 'SYNC'
+      //     ? event.state.unplayedInsectsPlayer2
+      //     : context.unplayedInsectsPlayer2,
+    }),
+    changePlayerAndUpdateTurn: assign({
+      currentPlayer: (context) => (context.currentPlayer === 1 ? 2 : 1), // Alternate between players
+      turn: (context) =>
+        // Seems that if context.currentPlayer changes back to one should work but idk why but it works correctly with 2 instead
+        context.currentPlayer === 2 ? context.turn + 1 : context.turn,
+    }),
+  },
   guards: {
     isGameOver: () => {
       // TODO: isGameOver(context.boardCells)

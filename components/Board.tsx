@@ -10,7 +10,7 @@ type BoardCoordinate = {
 
 type BoardProps = {
   cells: CellType[]
-  selectableCells: CellType[]
+  // selectableCells: CellType[]
 }
 
 const convertCellToGridLocation = (
