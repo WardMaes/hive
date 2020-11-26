@@ -13,7 +13,7 @@ export interface GameStateSchema {
     checkGameFinished: {}
     alternating: {}
     opponentTurn: {}
-    opponentDone: {}
+    // opponentDone: {}
     gameOver: {}
   }
 }

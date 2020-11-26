@@ -1,6 +1,6 @@
 import { Machine, assign, MachineOptions } from 'xstate'
 
-import { getStartInsectsPlayer } from '../lib/game'
+import { getStartInsectsPlayer, isGameOver } from '../lib/game'
 import { createRoom, joinRoom } from '../lib/p2p'
 
 import { GameContext } from './types/game.types'
@@ -89,25 +89,14 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     playing: {
       ...turnMachine,
     },
-    checkGameFinished: {
-      id: 'check',
-      // Transient transition with conditionals to check whether game is over
-      always: [{ target: 'alternating' }],
-    },
-    alternating: {
-      // Transient state that simply changes player turn
-      always: {
-        actions: ['changePlayerAndUpdateTurn'],
-        target: 'opponentTurn',
-      },
-    },
     // TODO temp state for online play
     opponentTurn: {
       on: {
         SYNC: [
           {
-            target: 'opponentDone',
+            target: 'checkGameFinished',
             cond: (context, event) =>
+              // Opponent finished turn, indicated by currentPlayer in sent context
               context.currentPlayer !== event.state.currentPlayer,
             actions: [
               'updateContextWithSync',
@@ -117,34 +106,36 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
             ],
           },
           {
-            actions: [
-              () => console.log('SYNC'),
-              (context, event) => {
-                console.log(
-                  context.unplayedInsectsPlayer1,
-                  context.unplayedInsectsPlayer2,
-                  event.state.unplayedInsectsPlayer1,
-                  event.state.unplayedInsectsPlayer2
-                )
-              },
-              'updateContextWithSync',
-            ],
+            actions: [() => console.log('SYNC'), 'updateContextWithSync'],
           },
         ],
       },
     },
-    opponentDone: {
-      entry: ['changePlayerAndUpdateTurn'],
-      always: 'playing',
+    checkGameFinished: {
+      id: 'check',
+      // Transient transition with conditionals to check whether game is over
+      always: [
+        { target: 'gameOver', cond: 'isGameOver' },
+        { target: 'alternating' },
+      ],
     },
-    gameOver: {},
+    alternating: {
+      entry: ['changePlayerAndUpdateTurn'],
+      // Transient state that simply changes player turn
+      always: [
+        { target: 'playing', cond: 'playerIsCurrentPlayer' },
+        { target: 'opponentTurn' },
+      ],
+    },
+    gameOver: {
+      entry: [() => console.log('Game finished')],
+    },
   },
   on: {
     RESET: {
       target: 'menu',
       actions: assign((_) => ({ ...gameMachineInitialContext })),
     },
-    // SYNC: {},
   },
 })
 
@@ -173,9 +164,12 @@ const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
     }),
   },
   guards: {
-    isGameOver: () => {
+    isGameOver: (context) => {
       // TODO: isGameOver(context.boardCells)
-      return false
+      return isGameOver(context.cells)
+    },
+    playerIsCurrentPlayer: (context) => {
+      return context.currentPlayer === context.playerId
     },
   },
 }
