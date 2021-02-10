@@ -1,16 +1,25 @@
-// @ts-ignore : typings don't exist for this package
-import Peer from 'simple-peerjs'
+import { io } from 'socket.io-client'
 
 import { Context } from '../machines/types'
 
-import ice_servers from '../config/webrtc_ICE_servers.json'
+const socket = io('http://localhost:3001')
 
-// enum PeerEventType {
-//   connect = 'connect',
-//   data = 'data',
-//   close = 'close',
-//   error = 'error',
-// }
+socket.on('connected', (socketId: string) => {
+  console.log('connected', socketId)
+
+  socket.on('ROOM.CREATED', (roomId: string) => {
+    console.log(`Created room ${roomId}`)
+  })
+
+  socket.on('ROOM.JOINED', (roomId: string) => {
+    console.log(`Joined room ${roomId}`)
+  })
+
+  socket.on('disconnect', (/* reason: string */) => {
+    console.log('disconnected!', socket)
+    socket.emit('PLAYER.DISCONNECT', socket.id)
+  })
+})
 
 type PeerType = {
   id: Promise<string>
@@ -26,98 +35,33 @@ type ConnectionType = {
   send: Function
 }
 
-type DataType = {}
-
-let peer1: PeerType
-let peer2: ConnectionType
-
 export async function createRoom(roomId: string, callback: Function) {
-  peer1 = createPeer(true, roomId)
+  console.log('creating game')
+  socket.emit('ROOM.CREATE', roomId)
 
-  peer1.on('error', function (error: any) {
-    throw new Error(error)
+  socket.on('SYNC', (context: Context) => {
+    console.log('callbacking')
+    callback({ type: 'SYNC', state: context })
   })
-
-  const id = await peer1.id
-
-  peer1.on('connect', function (connection: ConnectionType) {
-    console.log('Peer connected:', connection.peerId)
-    peer2 = connection
-
-    connection.peer.on('data', (data: DataType) => {
-      // connection.peer.send(JSON.stringify({ hi2: 'hi you 2' }))
-      const parsed = JSON.parse(data.toString())
-
-      if (parsed.type === 'sync') {
-        // send SYNC event to game machine
-        callback({ type: 'SYNC', state: parsed.data })
-      }
-    })
-  })
-
-  return id
 }
 
 export async function joinRoom(roomId: string, callback: Function) {
-  const peer = createPeer(false)
+  console.log('joingin', roomId)
+  socket.emit('ROOM.JOIN', roomId)
 
-  peer.on('error', function (error: any) {
-    throw new Error(error)
-  })
+  callback({ type: 'SYNC', state: { hi: 'test' } })
 
-  // const id = await peer.id
-  const x2 = await peer.connect(roomId, {})
-
-  peer2 = x2
-  // x2.peer.send(JSON.stringify({ hi: 'hi' }))
-
-  x2.peer.on('data', (data: DataType) => {
-    const parsed = JSON.parse(data.toString())
-
-    if (parsed.type === 'sync') {
-      // Send SYNC event to game machine
-      callback({ type: 'SYNC', state: parsed.data })
-    }
+  socket.on('SYNC', (context: Context) => {
+    console.log('callbacking')
+    callback({ type: 'SYNC', state: context })
   })
 }
 
 export async function sync(context: Context) {
-  console.log('syncing')
-  // User is host
-  if (context.roomId && peer1 && peer1.peer) {
-    peer1.peer.send(
-      JSON.stringify({
-        type: 'sync',
-        data: context,
-      })
-    )
-  } else if (peer2 && peer2.peer) {
-    // User is joiner
-    peer2.peer.send(
-      JSON.stringify({
-        type: 'sync',
-        data: context,
-      })
-    )
-  }
+  console.log('syncing', context)
+  socket.emit('SYNC', context)
 }
 
 export const generateRoomId = () => {
   return Math.random().toString(26).substring(5, 10)
-}
-
-const createPeer = (initiator: boolean, id?: string) => {
-  return new Peer({
-    id,
-    host: 'peer-connection.herokuapp.com',
-    secure: true,
-    port: 443,
-    path: '/peerjs/hive',
-    initiator: initiator,
-    simplePeer: {
-      config: {
-        iceServers: ice_servers,
-      },
-    },
-  })
 }
