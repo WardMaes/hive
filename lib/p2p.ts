@@ -21,20 +21,6 @@ socket.on('connected', (socketId: string) => {
   })
 })
 
-type PeerType = {
-  id: Promise<string>
-  on: (event: string, callback: Function) => {}
-  connect: Function
-  send: Function
-  peer?: ConnectionType
-}
-
-type ConnectionType = {
-  peerId: string
-  peer: PeerType
-  send: Function
-}
-
 export async function createRoom(roomId: string, callback: Function) {
   console.log('creating game')
   socket.emit('ROOM.CREATE', roomId)
