@@ -1,7 +1,7 @@
 import { assign, MachineOptions } from 'xstate'
 
 import { haveSameCubeCoordinates } from '../lib/hex'
-import { sync } from '../lib/p2p'
+import { sync } from '../lib/connection'
 import {
   CellStateEnum,
   addCellStates,

@@ -1,7 +1,7 @@
 import { Machine, assign, MachineOptions } from 'xstate'
 
 import { getStartInsectsPlayer } from '../lib/game'
-import { createRoom, joinRoom } from '../lib/p2p'
+import { createRoom, joinRoom } from '../lib/connection'
 
 import { GameContext } from './types/game.types'
 import { Context, Event, Schema } from './types'
