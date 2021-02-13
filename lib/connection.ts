@@ -2,7 +2,7 @@ import { io } from 'socket.io-client'
 
 import { Context } from '../machines/types'
 
-const socket = io('http://localhost:3001')
+const socket = io('https://backend-hive.herokuapp.com')
 
 socket.on('connected', (socketId: string) => {
   console.log('connected', socketId)
