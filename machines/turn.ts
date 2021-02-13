@@ -165,7 +165,7 @@ export const turnMachine: TurnStateSchema = {
 
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
-    sync: (context) => sync(context),
+    sync: (context) => sync(context, context.roomId),
     removeSelectableStates: assign({
       cells: (context) =>
         removeCellStatesFromCells([CellStateEnum.MOVEABLE], context.cells),

@@ -41,11 +41,11 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     joining: {
       invoke: {
         id: 'joinRoom',
-        src: (_, event) => (callback) => {
+        src: (context, event) => (callback) => {
           if (event.type !== 'GAME.JOIN') {
             return
           }
-          return joinRoom(event.roomId, callback)
+          return joinRoom(event.roomId, callback, context)
         },
         onDone: {
           target: 'opponentTurn',
@@ -65,9 +65,9 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     creating: {
       invoke: {
         id: 'createRoom',
-        src: (_, event) => (callback) => {
+        src: (context, event) => (callback) => {
           if (event.type === 'GAME.CREATE') {
-            return createRoom(event.roomId, callback)
+            return createRoom(event.roomId, callback, context)
           }
         },
         onDone: {
@@ -151,6 +151,9 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
 const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
     updateContextWithSync: assign({
+      roomId: (context, event) => {
+        return event.type === 'SYNC' ? event.state.roomId : context.roomId
+      },
       cells: (context, event) => {
         console.log(event)
         return event.type === 'SYNC' ? event.state.cells : context.cells
