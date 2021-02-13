@@ -21,9 +21,15 @@ socket.on('connected', (socketId: string) => {
   })
 })
 
-export async function createRoom(roomId: string, callback: Function) {
-  console.log('creating game')
+export async function createRoom(
+  roomId: string,
+  callback: Function,
+  context: Context
+) {
+  console.log('creating game', roomId, context)
   socket.emit('ROOM.CREATE', roomId)
+
+  callback({ type: 'SYNC', state: { ...context, roomId } })
 
   socket.on('SYNC', (context: Context) => {
     console.log('callbacking')
@@ -31,21 +37,25 @@ export async function createRoom(roomId: string, callback: Function) {
   })
 }
 
-export async function joinRoom(roomId: string, callback: Function) {
+export async function joinRoom(
+  roomId: string,
+  callback: Function,
+  context: Context
+) {
   console.log('joingin', roomId)
   socket.emit('ROOM.JOIN', roomId)
 
-  callback({ type: 'SYNC', state: { hi: 'test' } })
+  callback({ type: 'SYNC', state: { ...context, roomId } })
 
   socket.on('SYNC', (context: Context) => {
     console.log('callbacking')
-    callback({ type: 'SYNC', state: context })
+    callback({ type: 'SYNC', state: { ...context, roomId } })
   })
 }
 
-export async function sync(context: Context) {
-  console.log('syncing', context)
-  socket.emit('SYNC', context)
+export async function sync(context: Context, roomId: string) {
+  console.log('syncing', context, roomId)
+  socket.emit('SYNC', { ...context, roomId })
 }
 
 export const generateRoomId = () => {
