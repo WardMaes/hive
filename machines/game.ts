@@ -1,6 +1,6 @@
 import { Machine, assign, MachineOptions } from 'xstate'
 
-import { Cell, getStartInsectsPlayer } from '../lib/game'
+import { getStartInsectsPlayer } from '../lib/game'
 import { createRoom, joinRoom } from '../lib/connection'
 
 import { GameContext } from './types/game.types'
