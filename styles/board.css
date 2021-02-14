@@ -1,15 +1,15 @@
 .board {
   /* Extract to javascript later */
   --grid-gap: 0.5rem;
-  width: 100%;
+  /* width: 100%; */
   display: grid;
   list-style-type: none;
   margin: 0;
   /* TODO: Move to javascript to make configurable (could do actual calculation but looks complex, so guesstimate ratio) */
   gap: var(--grid-gap) calc(var(--grid-gap) * 2);
   margin: 0 auto;
-  flex-grow: 1;
-  max-width: 30rem;
+  /* flex-grow: 1; */
+  /* max-width: 30rem; */
 }
 
 .board-wrapper {
@@ -17,7 +17,7 @@
   align-items: center;
   justify-content: center;
   align-content: center;
-  padding-bottom: 250px;
+  /* padding-bottom: 250px; */
 }
 
 .cell {
