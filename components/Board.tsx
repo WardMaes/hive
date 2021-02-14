@@ -47,12 +47,6 @@ const Board = ({ cells }: BoardProps) => {
 
   const screenWidth = window.innerWidth
   const screenHeight = window.innerHeight
-  console.log('screenwidth', screenWidth)
-  console.log('screenHeight', screenHeight)
-  console.log('minX', minXCoordinate)
-  console.log('minYZCoordinate', minYZCoordinate)
-  console.log('maxYZCoordinate', maxYZCoordinate)
-  console.log('maxXCoordinate', maxXCoordinate)
 
   const yUnit = screenWidth < screenHeight ? totalCols : totalRows
   const unit = Math.min(screenWidth, screenHeight) / ((yUnit + 24) * 3)
