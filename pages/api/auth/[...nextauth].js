@@ -21,13 +21,13 @@ export default NextAuth({
      * @return {object}            JSON Web Token that will be saved
      */
     async jwt(token, user, account, profile, isNewUser) {
-      console.log('jwt', token, user, account, profile, isNewUser)
+      // console.log('jwt', token, user, account, profile, isNewUser)
       // Add access_token to the token right after signin
       if (account?.access_token) {
-        token.access_token = account.access_token
+        token.accessToken = account.access_token
       }
       if(user?.id){
-        token.user_id = user.id
+        token.userId = user.id
       }
       return token
     },
@@ -38,14 +38,14 @@ export default NextAuth({
    * @return {object}              Session that will be returned to the client 
    */
   async session(session, token) {
-    console.log('session', session, token)
+    // console.log('session', session, token)
     if(token?.access_token) {
       // Add property to session, like an access_token from a provider
-      session.access_token = token.access_token
+      session.accessToken = token.access_token
     }
     if(token?.user_id) {
       // Add property to session, like an user_id from a provider
-      session.user_id = token.user_id
+      session.userId = token.user_id
     }
     
     
