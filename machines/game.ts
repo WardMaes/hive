@@ -93,7 +93,6 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
         id: 'searchGame',
         src: (_, event) => (callback) => {
           if (event.type === 'GAME.SEARCH') {
-            console.log('asldfjlaskdf')
             return searchGame(callback)
           }
         },
