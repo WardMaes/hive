@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
-import { generateRoomId } from '../lib/p2p'
+import { generateRoomId } from '../lib/connection'
 
 const Menu = () => {
   const router = useRouter()

@@ -1,7 +1,7 @@
 import { assign, MachineOptions } from 'xstate'
 
 import { haveSameCubeCoordinates } from '../lib/hex'
-import { sync } from '../lib/p2p'
+import { sync } from '../lib/connection'
 import {
   CellStateEnum,
   addCellStates,
@@ -165,7 +165,7 @@ export const turnMachine: TurnStateSchema = {
 
 export const turnMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
-    sync: (context) => sync(context),
+    sync: (context) => sync(context, context.roomId),
     removeSelectableStates: assign({
       cells: (context) =>
         removeCellStatesFromCells([CellStateEnum.MOVEABLE], context.cells),

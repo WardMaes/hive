@@ -31,8 +31,8 @@ const Room = ({ roomId, initiator }: RoomProps) => {
   }, [gameState.value])
 
   return (
-    <div>
-      <div>
+    <div className="w-full">
+      <div className="w-full">
         {gameState.matches('creating') && (
           <div className="my-32">
             <Loader text="Creating game..." />
@@ -62,7 +62,7 @@ const Room = ({ roomId, initiator }: RoomProps) => {
 
         {(gameState.matches('playing') ||
           gameState.matches('opponentTurn')) && (
-          <div className="game" style={{ width: '100%' }}>
+          <div className="game w-full">
             <div className="fixed top-0 right-0 p-4">
               {playerToMove ? 'Your turn' : "Opponent's turn"}
             </div>
