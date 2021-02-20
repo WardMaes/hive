@@ -1,7 +1,7 @@
 import { Machine, assign, MachineOptions } from 'xstate'
 
 import { getStartInsectsPlayer } from '../lib/game'
-import { createRoom, joinRoom } from '../lib/connection'
+import { createRoom, joinRoom, searchGame } from '../lib/connection'
 
 import { GameContext } from './types/game.types'
 import { Context, Event, Schema } from './types'
@@ -35,6 +35,9 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
         },
         'GAME.CREATE': {
           target: 'creating',
+        },
+        'GAME.SEARCH': {
+          target: 'searching',
         },
       },
     },
@@ -80,6 +83,26 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
           target: 'error',
           actions: assign({
             roomId: (_) => '',
+            error: (_, event) => event.data,
+          }),
+        },
+      },
+    },
+    searching: {
+      invoke: {
+        id: 'searchGame',
+        src: (_, event) => (callback) => {
+          if (event.type === 'GAME.SEARCH') {
+            console.log('asldfjlaskdf')
+            return searchGame(callback)
+          }
+        },
+        onDone: {
+          target: 'menu',
+        },
+        onError: {
+          target: 'error',
+          actions: assign({
             error: (_, event) => event.data,
           }),
         },

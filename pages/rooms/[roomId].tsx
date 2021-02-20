@@ -45,6 +45,12 @@ const Room = ({ roomId, initiator }: RoomProps) => {
           </div>
         )}
 
+        {gameState.matches('searching') && (
+          <div className="my-32">
+            <Loader text="Searching game..." />
+          </div>
+        )}
+
         {gameState.matches('error') && (
           <div className="my-32 flex flex-col justify-center items-center text-center">
             <h2 className="text-2xl">An error occured </h2>
