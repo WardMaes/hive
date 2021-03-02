@@ -30,14 +30,14 @@ const Menu = () => {
     <div className="flex flex-col justify-center ">
       <button
         onClick={() => sendToGame('GAME.SEARCH')}
-        className="btn text-center hover:bg-gray-400"
+        className="btn my-1 text-center hover:bg-gray-400"
       >
         Search game
       </button>
 
       <a
         href={'/rooms/' + generated + '?create=1'}
-        className="btn text-center hover:bg-gray-400"
+        className="btn my-1 text-center hover:bg-gray-400"
       >
         Create game
       </a>

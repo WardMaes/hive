@@ -49,7 +49,7 @@ export default function Page() {
       </Head>
 
       <div>
-        <div className="my-32 p-8 bg-white shadow-md rounded">
+        <div className="my-32 p-8 bg-white shadow-md rounded max-w-2xl">
           {!session && (
             <>
               Not signed in <br />
@@ -57,13 +57,13 @@ export default function Page() {
             </>
           )}
           {session && (
-            <>
+            <div className="max-w-md">
               Signed in as {JSON.stringify(session, null, 2)} <br />
               <button onClick={() => signOut()}>Sign out</button>
               <button onClick={() => getRedemptions()}>Test api</button>
               <button onClick={() => createReward()}>Create</button>
               <Menu />
-            </>
+            </div>
           )}
         </div>
       </div>
