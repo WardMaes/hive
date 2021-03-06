@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client'
-import { getSession } from 'next-auth/client'
+// import { getSession } from 'next-auth/client'
 // const WebSocket = require('ws')
 
 import { Context } from '../machines/types'
@@ -15,18 +15,18 @@ function initMatchmakingSocket() {
     'ws://localhost:8888/api/matchmaking/queue'
   )
 
-  matchmakingSocket.onopen((x) => {
+  matchmakingSocket.onopen = (x) => {
     console.log('matchmakingsocket connection', x)
     matchmakingSocket.send('Hello!')
-  })
+  }
 
-  matchmakingSocket.onmessage((data) => {
+  matchmakingSocket.onmessage = (data) => {
     console.log('matchmakingSocket message', data)
-  })
+  }
 
-  matchmakingSocket.onerror((error) => {
-    console.log('matchmakingSocket ERROR', error.message)
-  })
+  matchmakingSocket.onerror = (error) => {
+    console.log('matchmakingSocket ERROR', JSON.stringify(error))
+  }
 }
 
 socket.on('connected', (socketId: string) => {
@@ -83,8 +83,8 @@ export async function joinRoom(
 }
 
 export async function searchGame(callback: Function) {
-  const session = await getSession()
-  const { userId } = session
+  // const session = await getSession()
+  // const { userId } = session
   // TODO: create socket connection with matchmaking backend
   // TODO: send gamesearch event to matchmaking-socket
   // TODO: on answer, joinRoom(roomId) (passed as callback)

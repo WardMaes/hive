@@ -8,7 +8,7 @@ const Menu = () => {
   const router = useRouter()
   const [code, setCode] = useState('')
   const [generated, setGenerated] = useState('')
-  const [gameState, sendToGame] = useContext(gameContext)
+  const [, sendToGame] = useContext(gameContext)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

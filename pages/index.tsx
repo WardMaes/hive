@@ -4,16 +4,19 @@ import { signIn, signOut, useSession } from 'next-auth/client'
 import { Menu } from '../components'
 
 export default function Page() {
-  const [session, loading] = useSession()
+  const [session] = useSession()
 
   const getRedemptions = async () => {
+    if (!session) {
+      return
+    }
     const res = await fetch(
       'https://api.twitch.tv/helix/channel_points/custom_rewards/redemptions?reward_id=&broadcaster_id=' +
         session.user_id,
       {
         headers: {
           Authorization: 'Bearer ' + session.access_token,
-          'Client-Id': 'ex4mnguf70q3gj1xgre1xwzv4u24s8'
+          'Client-Id': 'ex4mnguf70q3gj1xgre1xwzv4u24s8',
         },
       }
     )
@@ -21,19 +24,23 @@ export default function Page() {
     console.log('answer', answer)
   }
 
-  const createReward = async() => {
+  const createReward = async () => {
+    if (!session) {
+      return
+    }
     const res = await fetch(
-      'https://api.twitch.tv/helix/channel_points/custom_rewards?broadcaster_id=' + session.user_id,
+      'https://api.twitch.tv/helix/channel_points/custom_rewards?broadcaster_id=' +
+        session.user_id,
       {
         method: 'POST',
         body: JSON.stringify({
           title: 'test reward',
-          cost: 10
+          cost: 10,
         }),
         headers: {
           Authorization: 'Bearer ' + session.access_token,
           'Client-Id': 'ex4mnguf70q3gj1xgre1xwzv4u24s8',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
       }
     )
