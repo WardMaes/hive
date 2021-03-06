@@ -34,17 +34,27 @@ const Board = ({ cells }: BoardProps) => {
     (acc, { coord }) => (acc = Math.min(acc, -(coord.y - coord.z))),
     +Infinity
   )
+  const maxYZCoordinate = cells.reduce(
+    (acc, { coord }) => (acc = Math.max(acc, -(coord.y - coord.z))),
+    -Infinity
+  )
   const maxXCoordinate = cells.reduce(
     (acc, { coord }) => (acc = Math.max(acc, coord.x)),
     -Infinity
   )
   const totalCols = maxXCoordinate - minXCoordinate + 1
+  const totalRows = maxYZCoordinate - minYZCoordinate + 1
 
+  const screenWidth = window.innerWidth
+  const screenHeight = window.innerHeight
+
+  const yUnit = screenWidth < screenHeight ? totalCols : totalRows
+  const unit = Math.min(screenWidth, screenHeight) / ((yUnit + 24) * 3)
   return (
     <div
       className="board"
       style={{
-        gridTemplateColumns: `repeat(${totalCols}, 1fr 2fr) 1fr`,
+        gridTemplateColumns: `repeat(${totalCols}, ${unit}px ${2 * unit}px) ${unit}px`,
       }}
     >
       {cells.map((cell) => {

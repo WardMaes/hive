@@ -8,6 +8,7 @@ export interface GameStateSchema {
     menu: {}
     joining: {}
     creating: {}
+    searching: {}
     error: {}
     playing: TurnStateSchema
     checkGameFinished: {}
@@ -37,6 +38,7 @@ export type GameEvent =
   | { type: 'TURN.OVER' }
   | { type: 'GAME.JOIN'; roomId: string }
   | { type: 'GAME.CREATE'; roomId: string }
+  | { type: 'GAME.SEARCH' }
   | { type: 'SYNC'; state: GameContext }
   | { type: 'PEER.ERROR'; error: string }
   | { type: 'RESET' }

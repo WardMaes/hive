@@ -1,7 +1,7 @@
 import { Machine, assign, MachineOptions } from 'xstate'
 
 import { getStartInsectsPlayer } from '../lib/game'
-import { createRoom, joinRoom } from '../lib/p2p'
+import { createRoom, joinRoom, searchGame } from '../lib/connection'
 
 import { GameContext } from './types/game.types'
 import { Context, Event, Schema } from './types'
@@ -36,16 +36,19 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
         'GAME.CREATE': {
           target: 'creating',
         },
+        'GAME.SEARCH': {
+          target: 'searching',
+        },
       },
     },
     joining: {
       invoke: {
         id: 'joinRoom',
-        src: (_, event) => (callback) => {
+        src: (context, event) => (callback) => {
           if (event.type !== 'GAME.JOIN') {
             return
           }
-          return joinRoom(event.roomId, callback)
+          return joinRoom(event.roomId, callback, context)
         },
         onDone: {
           target: 'opponentTurn',
@@ -65,9 +68,9 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
     creating: {
       invoke: {
         id: 'createRoom',
-        src: (_, event) => (callback) => {
+        src: (context, event) => (callback) => {
           if (event.type === 'GAME.CREATE') {
-            return createRoom(event.roomId, callback)
+            return createRoom(event.roomId, callback, context)
           }
         },
         onDone: {
@@ -80,6 +83,25 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
           target: 'error',
           actions: assign({
             roomId: (_) => '',
+            error: (_, event) => event.data,
+          }),
+        },
+      },
+    },
+    searching: {
+      invoke: {
+        id: 'searchGame',
+        src: (_, event) => (callback) => {
+          if (event.type === 'GAME.SEARCH') {
+            return searchGame(callback)
+          }
+        },
+        onDone: {
+          target: 'menu',
+        },
+        onError: {
+          target: 'error',
+          actions: assign({
             error: (_, event) => event.data,
           }),
         },
@@ -151,6 +173,9 @@ const gameMachineSansOptions = Machine<Context, Schema, Event>({
 const gameMachineConfig: Partial<MachineOptions<Context, Event>> = {
   actions: {
     updateContextWithSync: assign({
+      roomId: (context, event) => {
+        return event.type === 'SYNC' ? event.state.roomId : context.roomId
+      },
       cells: (context, event) => {
         console.log(event)
         return event.type === 'SYNC' ? event.state.cells : context.cells

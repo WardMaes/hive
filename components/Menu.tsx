@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
-import { generateRoomId } from '../lib/p2p'
+import { generateRoomId } from '../lib/connection'
+import { gameContext } from '../context/machines'
 
 const Menu = () => {
   const router = useRouter()
   const [code, setCode] = useState('')
   const [generated, setGenerated] = useState('')
+  const [, sendToGame] = useContext(gameContext)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,9 +28,16 @@ const Menu = () => {
 
   return (
     <div className="flex flex-col justify-center ">
+      <button
+        onClick={() => sendToGame('GAME.SEARCH')}
+        className="btn my-1 text-center hover:bg-gray-400"
+      >
+        Search game
+      </button>
+
       <a
         href={'/rooms/' + generated + '?create=1'}
-        className="btn text-center hover:bg-gray-400"
+        className="btn my-1 text-center hover:bg-gray-400"
       >
         Create game
       </a>
